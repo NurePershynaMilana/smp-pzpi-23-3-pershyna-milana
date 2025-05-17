@@ -1,0 +1,1305 @@
+Міністерство освіти та науки України
+Харківський національний університет радіоелектроніки
+
+
+Кафедра програмної інженерії
+
+
+
+
+
+
+ЗВІТ
+ПРО ЛАБОРАТОРНУ РОБОТУ №3
+з дисципліни «Скриптові мови програмування»
+
+
+
+
+
+
+Виконала:
+ст. гр. ПЗПІ-23-3 
+Першина М. А. 
+
+Перевірив:
+Ст. викл. кафедри ПІ
+Сокорчук І.П.
+
+Харків, 2025 р. 
+
+Лабораторна робота №3
+
+
+	1 Мета роботи:
+Метою лабораторної роботи є створення веб-магазину з використанням PHP та HTML. Завдання передбачає розробку інтерфейсу сайту, реалізацію функціональності додавання товарів до кошика, перегляд кошика з можливістю видалення товарів.  
+	2 Задача:
+В рамках завдання потрібно розробити веб-застосунок, що складається з головної сторінки, сторінки товарів, кошика та профілю користувача. Необхідно реалізувати авторизацію користувачів для доступу до функціоналу сайту, створити можливість вибору та додавання товарів до кошика з вказанням кількості, відображення вмісту кошика з підрахунком загальної вартості. 
+	3 Хід роботи:
+Розробка структури сайту та реалізація головного файлу 
+
+ 
+
+Для організації веб-додатка було створено модульну структуру з розділенням компонентів на окремі файли:  
+
+<?php 
+
+// Include header 
+
+require_once('header.php'); 
+
+ 
+
+// Determine which page to show 
+
+$page = isset($_GET['page']) ? $_GET['page'] : 'products'; 
+
+ 
+
+// Include appropriate file depending on requested page 
+
+switch ($page) { 
+
+    case 'products': 
+
+        require_once('products.php'); 
+
+        break; 
+
+    case 'cart': 
+
+        require_once('cart.php'); 
+
+        break; 
+
+    case 'about': 
+
+        require_once('about.php'); 
+
+        break; 
+
+    default: 
+
+        require_once('page404.php'); 
+
+        break; 
+
+} 
+
+ 
+
+// Include footer 
+
+require_once('footer.php'); 
+
+?> 
+
+ 
+
+ 
+
+ 
+
+Реалізація модуля товарів з можливістю додавання до кошика 
+
+ 
+
+Важливою функціональністю магазину є відображення товарів та можливість додавання їх до кошика:  
+
+<?php 
+
+ 
+
+// Processing removal of product from cart 
+
+if (isset($_GET['remove'])) { 
+
+    $removeId = (int)$_GET['remove']; 
+
+     
+
+    if (isset($_SESSION['cart'])) { 
+
+        foreach ($_SESSION['cart'] as $key => $item) { 
+
+            if ($item['id'] == $removeId) { 
+
+                unset($_SESSION['cart'][$key]); 
+
+                break; 
+
+            } 
+
+        } 
+
+    } 
+
+     
+
+    // Redirect to cart page 
+
+    header('Location: main.php?page=cart'); 
+
+    exit; 
+
+} 
+
+ 
+
+// Check if cart is empty 
+
+if (empty($_SESSION['cart'])) { 
+
+    echo '<h2>Your cart is empty</h2>'; 
+
+    echo '<p><a href="main.php?page=products">Go shopping</a></p>'; 
+
+} else { 
+
+    // Display cart contents 
+
+    echo '<h2>Cart</h2>'; 
+
+    ?> 
+
+    <table class="cart-table"> 
+
+        <tr> 
+
+            <th>ID</th> 
+
+            <th>Name</th> 
+
+            <th>Price</th> 
+
+            <th>Quantity</th> 
+
+            <th>Sum</th> 
+
+            <th>Actions</th> 
+
+        </tr> 
+
+        <?php 
+
+        $totalSum = 0; 
+
+         
+
+        foreach ($_SESSION['cart'] as $item) { 
+
+            $id = $item['id']; 
+
+            $count = $item['count']; 
+
+             
+
+            // Check if product exists in our "catalog" 
+
+            if (isset($products[$id])) { 
+
+                $product = $products[$id]; 
+
+                $sum = $product['price'] * $count; 
+
+                $totalSum += $sum; 
+
+                ?> 
+
+                <tr> 
+
+                    <td><?= $id ?></td> 
+
+                    <td><?= $product['title'] ?></td> 
+
+                    <td>$<?= number_format($product['price'], 2) ?></td> 
+
+                    <td><?= $count ?></td> 
+
+                    <td>$<?= number_format($sum, 2) ?></td> 
+
+                    <td> 
+
+                        <a href="main.php?page=cart&remove=<?= $id ?>">🗑️</a> 
+
+                    </td> 
+
+                </tr> 
+
+                <?php 
+
+            } 
+
+        } 
+
+        ?> 
+
+        <tr> 
+
+            <td colspan="4"><strong>Total:</strong></td> 
+
+            <td colspan="2"><strong>$<?= number_format($totalSum, 2) ?></strong></td> 
+
+        </tr> 
+
+    </table> 
+
+     
+
+    <div style="margin-top: 20px; text-align: right;"> 
+
+        <a href="main.php?page=products" class="button" style="background-color: #888; margin-right: 10px;">Continue Shopping</a> 
+
+        <button class="button">Checkout</button> 
+
+    </div> 
+
+    <?php 
+
+} 
+
+?> 
+
+ 
+
+ 
+
+Відображення продуктів 
+
+ 
+
+<?php 
+
+// Products array (simulating database) 
+
+$products = [ 
+
+    1 => [ 
+
+        'id' => 1, 
+
+        'title' => 'Cola', 
+
+        'description' => 'Refreshing carbonated drink', 
+
+        'price' => 1.50 
+
+    ], 
+
+    2 => [ 
+
+        'id' => 2, 
+
+        'title' => 'Fanta', 
+
+        'description' => 'Orange flavored carbonated drink', 
+
+        'price' => 1.50 
+
+    ], 
+
+    3 => [ 
+
+        'id' => 3, 
+
+        'title' => 'Sprite', 
+
+        'description' => 'Clear lemon-lime flavored carbonated drink', 
+
+        'price' => 1.50 
+
+    ], 
+
+    4 => [ 
+
+        'id' => 4, 
+
+        'title' => 'Nuts', 
+
+        'description' => 'Assorted nuts mix', 
+
+        'price' => 3.00 
+
+    ] 
+
+]; 
+
+ 
+
+// Processing adding product to cart 
+
+if (isset($_POST['addIdInput'])) { 
+
+    $id = (int)$_POST['addIdInput']; 
+
+    $addCount = isset($_POST['addCountInput']) && $_POST['addCountInput'] > 0  
+
+        ? (int)$_POST['addCountInput']  
+
+        : 1; 
+
+     
+
+    // Initialize cart if it doesn't exist 
+
+    if (!isset($_SESSION['cart'])) { 
+
+        $_SESSION['cart'] = []; 
+
+    } 
+
+     
+
+    // Check if product is already in cart 
+
+    $itemExists = false; 
+
+    foreach ($_SESSION['cart'] as $key => $item) { 
+
+        if ($item['id'] == $id) { 
+
+            $_SESSION['cart'][$key]['count'] += $addCount; 
+
+            $itemExists = true; 
+
+            break; 
+
+        } 
+
+    } 
+
+     
+
+    // If product is not in cart, add it 
+
+    if (!$itemExists) { 
+
+        $_SESSION['cart'][] = [ 
+
+            'id' => $id, 
+
+            'count' => $addCount 
+
+        ]; 
+
+    } 
+
+     
+
+    // Redirect to cart page 
+
+    header('Location: main.php?page=cart'); 
+
+    exit; 
+
+} 
+
+?> 
+
+ 
+
+<h2>Our Products</h2> 
+
+ 
+
+<div class="product-list"> 
+
+    <?php foreach ($products as $id => $product): ?> 
+
+    <div class="product-item"> 
+
+        <div class="product-form"> 
+
+            <div> 
+
+                <h3><?= $product['title'] ?></h3> 
+
+                <p><?= $product['description'] ?></p> 
+
+                <strong>Price: $<?= number_format($product['price'], 2) ?></strong> 
+
+            </div> 
+
+             
+
+            <form method="POST" action="main.php?page=products" class="add-to-cart-form"> 
+
+                <input type="hidden" name="addIdInput" value="<?= $id ?>"> 
+
+                <input type="text" class="count-input" name="addCountInput" placeholder="1"> 
+
+                <input class="button" type="submit" value="Buy"> 
+
+            </form> 
+
+        </div> 
+
+    </div> 
+
+    <?php endforeach; ?> 
+
+</div> 
+
+ 
+
+ 
+
+Заголовок сайту 
+
+ 
+
+<?php 
+
+// Start session for cart functionality 
+
+session_start(); 
+
+?> 
+
+<!DOCTYPE html> 
+
+<html lang="en"> 
+
+<head> 
+
+    <meta charset="UTF-8"> 
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+
+    <title>Online Store</title> 
+
+</head> 
+
+<body> 
+
+    <div class="header"> 
+
+        <div class="container"> 
+
+            <div class="navigation"> 
+
+                <div> 
+
+                    <a href="main.php">🏠 Home</a> | 
+
+                    <a href="main.php?page=products">📋 Products</a> | 
+
+                    <a href="main.php?page=cart">🛒 Cart</a> 
+
+                </div> 
+
+            </div> 
+
+        </div> 
+
+    </div> 
+
+    <div class="container"> 
+
+        <div class="content"> 
+
+ 
+
+ 
+
+Підвал сайту 
+
+ 
+
+</div><!-- Close div.content --> 
+
+    </div><!-- Close div.container --> 
+
+     
+
+    <div class="footer"> 
+
+        <div class="container"> 
+
+            <p> 
+
+                <a href="main.php">Home</a> | 
+
+                <a href="main.php?page=products">Products</a> | 
+
+                <a href="main.php?page=cart">Cart</a> | 
+
+                <a href="main.php?page=about">About Us</a> 
+
+            </p> 
+
+            <p>&copy; <?php echo date('Y'); ?> Online Store</p> 
+
+        </div> 
+
+    </div> 
+
+</body> 
+
+</html> 
+ 
+
+Команда для локального виконання скрипта: 
+php -S localhost:8000 pzpi-23-3-pershyna-milana-task4.php 
+ 
+Висновок 
+ У результаті виконання лабораторної роботи було створено функціональний веб-магазин із використанням PHP, та HTML/CSS. Проект реалізує всі необхідні компоненти інтернет-магазину: відображення списку товарів, можливість їх додавання до кошика, перегляд вмісту кошика з розрахунком загальної вартості, а також авторизацію користувачів.
+
+ДОДАТОК А 
+
+Повний код програми 
+pzpi-23-3-pershyna-milana-task4.php (main file) - 
+
+<?php 
+
+// Include header 
+
+require_once('header.php'); 
+
+ 
+
+// Determine which page to show 
+
+$page = isset($_GET['page']) ? $_GET['page'] : 'products'; 
+
+ 
+
+// Include appropriate file depending on requested page 
+
+switch ($page) { 
+
+    case 'products': 
+
+        require_once('products.php'); 
+
+        break; 
+
+    case 'cart': 
+
+        require_once('cart.php'); 
+
+        break; 
+
+    case 'about': 
+
+        require_once('about.php'); 
+
+        break; 
+
+    default: 
+
+        require_once('page404.php'); 
+
+        break; 
+
+} 
+
+ 
+
+// Include footer 
+
+require_once('footer.php'); 
+
+?> 
+
+ 
+
+header.php – 
+
+<?php 
+
+// Start session for cart functionality 
+
+session_start(); 
+
+?> 
+
+<!DOCTYPE html> 
+
+<html lang="en"> 
+
+<head> 
+
+    <meta charset="UTF-8"> 
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+
+    <title>Online Store</title> 
+
+    <style> 
+
+        body { 
+
+            font-family: Arial, sans-serif; 
+
+            margin: 0; 
+
+            padding: 0; 
+
+            background-color: #f4f4f4; 
+
+        } 
+
+         
+
+        .header { 
+
+            background-color: #fff; 
+
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+
+            padding: 10px 0; 
+
+            margin-bottom: 20px; 
+
+        } 
+
+         
+
+        .container { 
+
+            width: 80%; 
+
+            margin: 0 auto; 
+
+            overflow: hidden; 
+
+        } 
+
+         
+
+        .navigation { 
+
+            display: flex; 
+
+            justify-content: space-between; 
+
+            align-items: center; 
+
+            border-bottom: 1px solid #eee; 
+
+            padding-bottom: 10px; 
+
+        } 
+
+         
+
+        .navigation a { 
+
+            text-decoration: none; 
+
+            color: #333; 
+
+            padding: 10px 15px; 
+
+            display: inline-block; 
+
+        } 
+
+         
+
+        .content { 
+
+            background: #fff; 
+
+            padding: 20px; 
+
+            min-height: 500px; 
+
+            margin-bottom: 20px; 
+
+        } 
+
+         
+
+        .footer { 
+
+            background: #333; 
+
+            color: #fff; 
+
+            text-align: center; 
+
+            padding: 10px 0; 
+
+            position: relative; 
+
+            bottom: 0; 
+
+            width: 100%; 
+
+        } 
+
+         
+
+        .footer a { 
+
+            color: #fff; 
+
+            margin: 0 10px; 
+
+            text-decoration: none; 
+
+        } 
+
+         
+
+        .product-list { 
+
+            display: flex; 
+
+            flex-wrap: wrap; 
+
+            justify-content: space-between; 
+
+        } 
+
+         
+
+        .product-item { 
+
+            border: 1px solid #ddd; 
+
+            margin-bottom: 20px; 
+
+            padding: 15px; 
+
+            width: 100%; 
+
+            background: #fff; 
+
+        } 
+
+         
+
+        .product-form { 
+
+            display: flex; 
+
+            align-items: center; 
+
+            justify-content: space-between; 
+
+        } 
+
+         
+
+        .count-input { 
+
+            width: 50px; 
+
+            padding: 5px; 
+
+            margin: 0 10px; 
+
+        } 
+
+         
+
+        .button { 
+
+            background: #4CAF50; 
+
+            color: white; 
+
+            border: none; 
+
+            padding: 8px 15px; 
+
+            cursor: pointer; 
+
+        } 
+
+         
+
+        .cart-table { 
+
+            width: 100%; 
+
+            border-collapse: collapse; 
+
+        } 
+
+         
+
+        .cart-table th, .cart-table td { 
+
+            padding: 10px; 
+
+            text-align: left; 
+
+            border-bottom: 1px solid #ddd; 
+
+        } 
+
+         
+
+        .cart-table th { 
+
+            background-color: #333; 
+
+            color: white; 
+
+        } 
+
+    </style> 
+
+</head> 
+
+<body> 
+
+    <div class="header"> 
+
+        <div class="container"> 
+
+            <div class="navigation"> 
+
+                <div> 
+
+                    <a href="main.php">🏠 Home</a> | 
+
+                    <a href="main.php?page=products">📋 Products</a> | 
+
+                    <a href="main.php?page=cart">🛒 Cart</a> 
+
+                </div> 
+
+            </div> 
+
+        </div> 
+
+    </div> 
+
+    <div class="container"> 
+
+        <div class="content"> 
+
+ 
+
+ 
+
+footer.php – 
+
+</div><!-- Close div.content --> 
+
+    </div><!-- Close div.container --> 
+
+     
+
+    <div class="footer"> 
+
+        <div class="container"> 
+
+            <p> 
+
+                <a href="main.php">Home</a> | 
+
+                <a href="main.php?page=products">Products</a> | 
+
+                <a href="main.php?page=cart">Cart</a> | 
+
+                <a href="main.php?page=about">About Us</a> 
+
+            </p> 
+
+            <p>&copy; <?php echo date('Y'); ?> Online Store</p> 
+
+        </div> 
+
+    </div> 
+
+</body> 
+
+</html> 
+
+ 
+
+ 
+
+cart.php- 
+
+<?php 
+
+// Products array (simulating database) 
+
+$products = [ 
+
+    1 => [ 
+
+        'id' => 1, 
+
+        'title' => 'Cola', 
+
+        'description' => 'Refreshing carbonated drink', 
+
+        'price' => 1.50 
+
+    ], 
+
+    2 => [ 
+
+        'id' => 2, 
+
+        'title' => 'Fanta', 
+
+        'description' => 'Orange flavored carbonated drink', 
+
+        'price' => 1.50 
+
+    ], 
+
+    3 => [ 
+
+        'id' => 3, 
+
+        'title' => 'Sprite', 
+
+        'description' => 'Clear lemon-lime flavored carbonated drink', 
+
+        'price' => 1.50 
+
+    ], 
+
+    4 => [ 
+
+        'id' => 4, 
+
+        'title' => 'Nuts', 
+
+        'description' => 'Assorted nuts mix', 
+
+        'price' => 3.00 
+
+    ] 
+
+]; 
+
+ 
+
+// Processing removal of product from cart 
+
+if (isset($_GET['remove'])) { 
+
+    $removeId = (int)$_GET['remove']; 
+
+     
+
+    if (isset($_SESSION['cart'])) { 
+
+        foreach ($_SESSION['cart'] as $key => $item) { 
+
+            if ($item['id'] == $removeId) { 
+
+                unset($_SESSION['cart'][$key]); 
+
+                break; 
+
+            } 
+
+        } 
+
+    } 
+
+     
+
+    // Redirect to cart page 
+
+    header('Location: main.php?page=cart'); 
+
+    exit; 
+
+} 
+
+ 
+
+// Check if cart is empty 
+
+if (empty($_SESSION['cart'])) { 
+
+    echo '<h2>Your cart is empty</h2>'; 
+
+    echo '<p><a href="main.php?page=products">Go shopping</a></p>'; 
+
+} else { 
+
+    // Display cart contents 
+
+    echo '<h2>Cart</h2>'; 
+
+    ?> 
+
+    <table class="cart-table"> 
+
+        <tr> 
+
+            <th>ID</th> 
+
+            <th>Name</th> 
+
+            <th>Price</th> 
+
+            <th>Quantity</th> 
+
+            <th>Sum</th> 
+
+            <th>Actions</th> 
+
+        </tr> 
+
+        <?php 
+
+        $totalSum = 0; 
+
+         
+
+        foreach ($_SESSION['cart'] as $item) { 
+
+            $id = $item['id']; 
+
+            $count = $item['count']; 
+
+             
+
+            // Check if product exists in our "catalog" 
+
+            if (isset($products[$id])) { 
+
+                $product = $products[$id]; 
+
+                $sum = $product['price'] * $count; 
+
+                $totalSum += $sum; 
+
+                ?> 
+
+                <tr> 
+
+                    <td><?= $id ?></td> 
+
+                    <td><?= $product['title'] ?></td> 
+
+                    <td>$<?= number_format($product['price'], 2) ?></td> 
+
+                    <td><?= $count ?></td> 
+
+                    <td>$<?= number_format($sum, 2) ?></td> 
+
+                    <td> 
+
+                        <a href="main.php?page=cart&remove=<?= $id ?>">🗑️</a> 
+
+                    </td> 
+
+                </tr> 
+
+                <?php 
+
+            } 
+
+        } 
+
+        ?> 
+
+        <tr> 
+
+            <td colspan="4"><strong>Total:</strong></td> 
+
+            <td colspan="2"><strong>$<?= number_format($totalSum, 2) ?></strong></td> 
+
+        </tr> 
+
+    </table> 
+
+     
+
+    <div style="margin-top: 20px; text-align: right;"> 
+
+        <a href="main.php?page=products" class="button" style="background-color: #888; margin-right: 10px;">Continue Shopping</a> 
+
+        <button class="button">Checkout</button> 
+
+    </div> 
+
+    <?php 
+
+} 
+
+?> 
+
+ 
+
+ 
+
+products.php- 
+
+<?php 
+
+// Products array (simulating database) 
+
+$products = [ 
+
+    1 => [ 
+
+        'id' => 1, 
+
+        'title' => 'Cola', 
+
+        'description' => 'Refreshing carbonated drink', 
+
+        'price' => 1.50 
+
+    ], 
+
+    2 => [ 
+
+        'id' => 2, 
+
+        'title' => 'Fanta', 
+
+        'description' => 'Orange flavored carbonated drink', 
+
+        'price' => 1.50 
+
+    ], 
+
+    3 => [ 
+
+        'id' => 3, 
+
+        'title' => 'Sprite', 
+
+        'description' => 'Clear lemon-lime flavored carbonated drink', 
+
+        'price' => 1.50 
+
+    ], 
+
+    4 => [ 
+
+        'id' => 4, 
+
+        'title' => 'Nuts', 
+
+        'description' => 'Assorted nuts mix', 
+
+        'price' => 3.00 
+
+    ] 
+
+]; 
+
+ 
+
+// Processing adding product to cart 
+
+if (isset($_POST['addIdInput'])) { 
+
+    $id = (int)$_POST['addIdInput']; 
+
+    $addCount = isset($_POST['addCountInput']) && $_POST['addCountInput'] > 0  
+
+        ? (int)$_POST['addCountInput']  
+
+        : 1; 
+
+     
+
+    // Initialize cart if it doesn't exist 
+
+    if (!isset($_SESSION['cart'])) { 
+
+        $_SESSION['cart'] = []; 
+
+    } 
+
+     
+
+    // Check if product is already in cart 
+
+    $itemExists = false; 
+
+    foreach ($_SESSION['cart'] as $key => $item) { 
+
+        if ($item['id'] == $id) { 
+
+            $_SESSION['cart'][$key]['count'] += $addCount; 
+
+            $itemExists = true; 
+
+            break; 
+
+        } 
+
+    } 
+
+     
+
+    // If product is not in cart, add it 
+
+    if (!$itemExists) { 
+
+        $_SESSION['cart'][] = [ 
+
+            'id' => $id, 
+
+            'count' => $addCount 
+
+        ]; 
+
+    } 
+
+     
+
+    // Redirect to cart page 
+
+    header('Location: main.php?page=cart'); 
+
+    exit; 
+
+} 
+
+?> 
+
+ 
+
+<h2>Our Products</h2> 
+
+ 
+
+<div class="product-list"> 
+
+    <?php foreach ($products as $id => $product): ?> 
+
+    <div class="product-item"> 
+
+        <div class="product-form"> 
+
+            <div> 
+
+                <h3><?= $product['title'] ?></h3> 
+
+                <p><?= $product['description'] ?></p> 
+
+                <strong>Price: $<?= number_format($product['price'], 2) ?></strong> 
+
+            </div> 
+
+             
+
+            <form method="POST" action="main.php?page=products" class="add-to-cart-form"> 
+
+                <input type="hidden" name="addIdInput" value="<?= $id ?>"> 
+
+                <input type="text" class="count-input" name="addCountInput" placeholder="1"> 
+
+                <input class="button" type="submit" value="Buy"> 
+
+            </form> 
+
+        </div> 
+
+    </div> 
+
+    <?php endforeach; ?> 
+
+</div> 

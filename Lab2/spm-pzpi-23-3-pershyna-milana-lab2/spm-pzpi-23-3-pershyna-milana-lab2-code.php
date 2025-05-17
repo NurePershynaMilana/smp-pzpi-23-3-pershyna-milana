@@ -1,0 +1,227 @@
+<?php
+
+// Кодування для коректного відображення кирилиці в терміналі
+system('chcp 65001');
+
+// Товари в магазині
+$products = [
+    1 => ['name' => 'Молоко пастеризоване', 'price' => 12],
+    2 => ['name' => 'Хліб чорний', 'price' => 9],
+    3 => ['name' => 'Сир білий', 'price' => 21],
+    4 => ['name' => 'Сметана 20%', 'price' => 25],
+    5 => ['name' => 'Кефір 1%', 'price' => 19],
+    6 => ['name' => 'Вода газована', 'price' => 18],
+    7 => ['name' => 'Печиво "Весна"', 'price' => 14],
+];
+
+// Кошик користувача
+$cart = [];
+
+// Дані користувача
+$user = [
+    'name' => '',
+    'age' => 0
+];
+
+// Головна функція
+function main() {
+    global $cart;
+    
+    while (true) {
+        showMainMenu();
+        $command = readline("Введіть команду: ");
+        
+        switch ($command) {
+            case '0':
+                echo "Дякуємо за покупки! До побачення!\n";
+                exit(0);
+            case '1':
+                selectProducts();
+                break;
+            case '2':
+                showReceipt();
+                break;
+            case '3':
+                manageProfile();
+                break;
+            default:
+                echo "ПОМИЛКА! Введіть правильну команду\n";
+                break;
+        }
+    }
+}
+
+// Відображення головного меню
+function showMainMenu() {
+    echo "\n";
+    echo "################################\n";
+    echo "# ПРОДОВОЛЬЧИЙ МАГАЗИН \"ВЕСНА\" #\n";
+    echo "################################\n";
+    echo "1 Вибрати товари\n";
+    echo "2 Отримати підсумковий рахунок\n";
+    echo "3 Налаштувати свій профіль\n";
+    echo "0 Вийти з програми\n";
+}
+
+// Функція вибору товарів
+function selectProducts() {
+    global $products, $cart;
+    
+    while (true) {
+        showProductList();
+        $productId = readline("Виберіть товар: ");
+        
+        if ($productId === '0') {
+            return;
+        }
+        
+        if (!isset($products[$productId])) {
+            echo "ПОМИЛКА! ВКАЗАНО НЕПРАВИЛЬНИЙ НОМЕР ТОВАРУ\n\n";
+            continue;
+        }
+        
+        $product = $products[$productId];
+        echo "Вибрано: " . $product['name'] . "\n";
+        
+        $quantity = readline("Введіть кількість, штук: ");
+        $quantity = (int)$quantity;
+        
+        if ($quantity < 0) {
+            echo "ПОМИЛКА! Кількість товару повинна бути більшою або рівною нулю.\n";
+            continue;
+        }
+        
+        if ($quantity >= 100) {
+            echo "ПОМИЛКА! Кількість товару повинна бути менше 100 штук.\n";
+            continue;
+        }
+        
+        if ($quantity === 0) {
+            if (isset($cart[$productId])) {
+                unset($cart[$productId]);
+                echo "ВИДАЛЯЮ З КОШИКА\n";
+                if (empty($cart)) {
+                    echo "КОШИК ПОРОЖНІЙ\n";
+                } else {
+                    showCart();
+                }
+            } else {
+                echo "ТОВАР ВІДСУТНІЙ У КОШИКУ\n";
+            }
+        } else {
+            $cart[$productId] = [
+                'name' => $product['name'],
+                'price' => $product['price'],
+                'quantity' => $quantity
+            ];
+            echo "У КОШИКУ:\n";
+            showCart();
+        }
+    }
+}
+
+// Відображення списку товарів
+function showProductList() {
+    global $products;
+    
+    echo "\n";
+    echo "№  НАЗВА                 ЦІНА\n";
+    foreach ($products as $id => $product) {
+        $name = $product['name'];
+        $spaces = 22 - mb_strlen($name);
+        if ($spaces < 0) $spaces = 0;
+        
+        echo $id . "  " . $name . str_repeat(" ", $spaces) . $product['price'] . "\n";
+    }
+    echo "   -----------\n";
+    echo "0  ПОВЕРНУТИСЯ\n";
+}
+
+// Відображення вмісту кошика
+function showCart() {
+    global $cart;
+    
+    echo "НАЗВА        КІЛЬКІСТЬ\n";
+    foreach ($cart as $item) {
+        $name = $item['name'];
+        if (mb_strlen($name) > 12) {
+            $name = mb_substr($name, 0, 12);
+        }
+        $spaces = 12 - mb_strlen($name);
+        if ($spaces < 0) $spaces = 0;
+        
+        echo $name . str_repeat(" ", $spaces) . $item['quantity'] . "\n";
+    }
+}
+
+// Відображення підсумкового рахунку
+function showReceipt() {
+    global $cart;
+    
+    if (empty($cart)) {
+        echo "КОШИК ПОРОЖНІЙ\n";
+        return;
+    }
+    
+    echo "№  НАЗВА                 ЦІНА  КІЛЬКІСТЬ  ВАРТІСТЬ\n";
+    
+    $totalCost = 0;
+    $i = 1;
+    
+    foreach ($cart as $item) {
+        $cost = $item['price'] * $item['quantity'];
+        $totalCost += $cost;
+        
+        $name = $item['name'];
+        $nameSpaces = 22 - mb_strlen($name);
+        if ($nameSpaces < 0) $nameSpaces = 0;
+        
+        $priceStr = (string)$item['price'];
+        $priceSpaces = 5 - strlen($priceStr);
+        if ($priceSpaces < 0) $priceSpaces = 0;
+        
+        $quantityStr = (string)$item['quantity'];
+        $quantitySpaces = 10 - strlen($quantityStr);
+        if ($quantitySpaces < 0) $quantitySpaces = 0;
+        
+        echo $i . "  " . $name . str_repeat(" ", $nameSpaces) 
+            . $priceStr . str_repeat(" ", $priceSpaces) 
+            . $quantityStr . str_repeat(" ", $quantitySpaces) . $cost . "\n";
+        
+        $i++;
+    }
+    
+    echo "РАЗОМ ДО CПЛАТИ: " . $totalCost . "\n";
+}
+
+// Функція налаштування профілю
+function manageProfile() {
+    global $user;
+    
+    $name = readline("Ваше імʼя: ");
+    
+    // Перевірка імені
+    if (empty($name) || !preg_match('/[a-zA-Zа-яА-ЯіІїЇєЄґҐ]/u', $name)) {
+        echo "ПОМИЛКА! Ім'я повинно містити хоча б одну літеру.\n";
+        return;
+    }
+    
+    $age = readline("Ваш вік: ");
+    $age = (int)$age;
+    
+    // Перевірка віку
+    if ($age < 7 || $age > 150) {
+        echo "ПОМИЛКА! Вік повинен бути від 7 до 150 років.\n";
+        return;
+    }
+    
+    // Зберігаємо дані користувача
+    $user['name'] = $name;
+    $user['age'] = $age;
+    
+    echo "Профіль успішно оновлено!\n";
+}
+
+// Запуск програми
+main();
+?>
