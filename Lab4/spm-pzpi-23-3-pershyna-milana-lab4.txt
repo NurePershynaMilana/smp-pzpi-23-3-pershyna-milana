@@ -1,0 +1,871 @@
+Міністерство освіти та науки України
+Харківський національний університет радіоелектроніки
+
+
+Кафедра програмної інженерії
+
+
+
+
+
+
+ЗВІТ
+ПРО ЛАБОРАТОРНУ РОБОТУ №4
+з дисципліни «Скриптові мови програмування»
+
+
+
+
+
+
+Виконала:
+ст. гр. ПЗПІ-23-3 
+Першина М. А. 
+
+Перевірив:
+Ст. викл. кафедри ПІ
+Сокорчук І.П.
+
+Харків, 2025 р. 
+
+Лабораторна робота №4
+
+
+	1 Мета роботи:
+Метою лабораторної роботи є створення веб-додатку інтернет-магазину з
+використанням мови PHP. Завдання дозволяє закріпити навички роботи з PHP,
+включаючи роботу з сесіями, формами, валідацією даних, а також створенням
+інтерактивних елементів веб-інтерфейсу. Додатково мета включає реалізацію
+аутентифікації користувачів, управління кошиком покупок та розробку профілю
+користувача.
+
+	2 Задача:
+В рамках завдання потрібно розробити веб-додаток, який виконує роль
+інтернет-магазину з функціями перегляду товарів, додавання їх до кошика,
+управління кошиком, аутентифікації користувачів та управління профілем.
+Особливу увагу слід приділити перевіркам введених даних, роботі з сесіями для
+збереження стану кошика та користувача, а також розробці зручного
+користувацького інтерфейсу. Програма повинна забезпечувати зручну навігацію
+між сторінками, перевіряти права доступу та надавати відповідні повідомлення
+при помилках.
+
+	3 Хід роботи:
+1. Структура сайту та система маршрутизації
+Основна структура сайту реалізована у головному файлі main.php, який
+відповідає за завантаження відповідних компонентів сторінок:
+// Determine which page to show
+$page = isset($_GET['page']) ? $_GET['page'] : 'products';
+// Check if access is restricted
+$restricted_pages = ['profile', 'cart'];
+if (in_array($page, $restricted_pages) && (!isset($_SESSION['logged_in']) ||
+$_SESSION['logged_in'] !== true)) {
+ // Show login required message
+ ?>
+ <div style="text-align: center; padding: 50px 0;">
+ <h2>Please Login first</h2>
+ <p><a href="main.php?page=login">Go to login page</a></p>
+ </div>
+ <?php
+} else {
+ // Include appropriate file depending on requested page
+ switch ($page) {
+ case 'products':
+ require_once('products.php');
+ break;
+ case 'cart':
+ require_once('cart.php');
+ break;
+ // інші сторінки...
+ }
+}
+2. Реалізація сторінки товарів
+Сторінка товарів відображає список доступних продуктів і форму для
+додавання їх у кошик:
+// Processing adding product to cart
+if (isset($_POST['addIdInput'])) {
+ $id = (int)$_POST['addIdInput'];
+ $addCount = isset($_POST['addCountInput']) &&
+$_POST['addCountInput'] > 0
+ ? (int)$_POST['addCountInput']
+ : 1;
+
+ // Initialize cart if it doesn't exist
+ if (!isset($_SESSION['cart'])) {
+ $_SESSION['cart'] = [];
+ }
+
+ // Check if product is already in cart
+ $itemExists = false;
+ foreach ($_SESSION['cart'] as $key => $item) {
+ if ($item['id'] == $id) {
+ $_SESSION['cart'][$key]['count'] += $addCount;
+ $itemExists = true;
+ break;
+ }
+ }
+
+ // If product is not in cart, add it
+ if (!$itemExists) {
+ $_SESSION['cart'][] = [
+ 'id' => $id,
+ 'count' => $addCount
+ ];
+ }
+}
+3. Управління кошиком покупок
+Сторінка кошика показує обрані товари та дозволяє видаляти їх:
+// Processing removal of product from cart
+if (isset($_GET['remove'])) {
+ $removeId = (int)$_GET['remove'];
+
+ if (isset($_SESSION['cart'])) {
+ foreach ($_SESSION['cart'] as $key => $item) {
+ if ($item['id'] == $removeId) {
+ unset($_SESSION['cart'][$key]);
+ break;
+ }
+ }
+ }
+
+ header('Location: main.php?page=cart');
+ exit;
+}
+// Check if cart is empty
+if (empty($_SESSION['cart'])) {
+ echo '<h2>Your cart is empty</h2>';
+ echo '<p><a href="main.php?page=products">Go shopping</a></p>';
+} else {
+ // Display cart contents as a table
+ // ...
+}
+4. Реалізація системи аутентифікації
+Функціонал авторизації користувачів реалізований через форму входу та
+сесії:
+// Check if form submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+ // Simple validation
+ if (!empty($_POST['username']) && !empty($_POST['password'])) {
+ // In a real application, you would verify against a database
+ $credentials = [
+ 'userName' => 'Test',
+ 'password' => '123123'
+ ];
+
+ // Check credentials
+ if ($_POST['username'] === $credentials['userName'] &&
+ $_POST['password'] === $credentials['password']) {
+
+ // Login successful
+ $_SESSION['logged_in'] = true;
+ $_SESSION['username'] = $_POST['username'];
+ $_SESSION['login_time'] = date('Y-m-d H:i:s');
+
+ // Redirect to products page
+ header('Location: main.php?page=products');
+ exit;
+ } else {
+ $error_message = "Invalid username or password";
+ }
+ }
+}
+5. Створення та управління профілем користувача
+Сторінка профілю дозволяє користувачу заповнити особисту інформацію:
+// Process profile update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
+isset($_POST['save_profile'])) {
+ $errors = [];
+
+ // Validate name
+ if (empty($_POST['name'])) {
+ $errors[] = "Name is required";
+ }
+
+ // Validate surname
+ if (empty($_POST['surname'])) {
+ $errors[] = "Surname is required";
+ } elseif (str_word_count($_POST['surname']) < 2) {
+ $errors[] = "Surname must contain at least 2 words";
+ }
+
+ // More validation...
+
+ // If no errors, save profile
+ if (empty($errors)) {
+ $_SESSION['profile'] = [
+ 'name' => $_POST['name'],
+ 'surname' => $_POST['surname'],
+ 'birthday' => $_POST['birthday'],
+ 'brief_description' => $_POST['brief_description'],
+ 'photo' => $_SESSION['profile']['photo']
+ ];
+
+ $success_message = "Profile updated successfully";
+ }
+}
+
+
+
+
+Команда для локального виконання скрипта: 
+php -S localhost:8000 spm-pzpi-23-3-pershyna-milana-lab4-code.php 
+ 
+
+4. Висновок 
+ У ході виконання лабораторної роботи було розроблено веб-додаток
+інтернет-магазину, який демонструє базові принципи роботи з PHP, включаючи
+роботу з сесіями, формами, валідацією даних та управлінням доступом. Додаток
+дозволяє переглядати товари, додавати їх у кошик, здійснювати аутентифікацію
+користувачів та управляти профілем. Реалізовано перевірки введених даних та
+контроль доступу до сторінок для неавторизованих користувачів. Таким чином,
+поставленої мети досягнуто — було закріплено навички створення веб-додатків
+з використанням PHP та розроблено функціональний інтернет-магазин з
+базовими можливостями електронної комерції.
+
+
+
+
+
+
+ДОДАТОК А 
+
+Повний код програми 
+pzpi-23-3-pershyna-milana-task4.php (main file) - 
+
+<?php
+// Include header
+require_once('header.php');
+// Determine which page to show
+$page = isset($_GET['page']) ? $_GET['page'] : 'products';
+// Check if access is restricted
+$restricted_pages = ['profile', 'cart'];
+if (in_array($page, $restricted_pages) && (!isset($_SESSION['logged_in'])
+|| $_SESSION['logged_in'] !== true)) {
+ // Show login required message
+ ?>
+ <div style="text-align: center; padding: 50px 0;">
+ <h2>Please Login first</h2>
+ <p><a href="main.php?page=login">Go to login page</a></p>
+ </div>
+ <?php
+} else {
+ // Include appropriate file depending on requested page
+ switch ($page) {
+ case 'products':
+ require_once('products.php');
+ break;
+ case 'cart':
+ require_once('cart.php');
+ break;
+ case 'login':
+ require_once('login.php');
+ break;
+ case 'logout':
+ require_once('logout.php');
+ break;
+ case 'profile':
+ require_once('profile.php');
+ break;
+ case 'about':
+ require_once('about.php');
+ break;
+ default:
+ require_once('page404.php');
+ break;
+ }
+}
+// Include footer
+require_once('footer.php');
+?>
+<?php
+// Start session for cart functionality
+session_start();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initialscale=1.0">
+ <title>Online Store</title>
+ <style>
+ body {
+ font-family: Arial, sans-serif;
+ margin: 0;
+ padding: 0;
+ background-color: #f4f4f4;
+ }
+
+ .header {
+ background-color: #fff;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ padding: 10px 0;
+ margin-bottom: 20px;
+ }
+
+ .container {
+ width: 80%;
+ margin: 0 auto;
+ overflow: hidden;
+ }
+
+ .navigation {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ border-bottom: 1px solid #eee;
+ padding-bottom: 10px;
+ }
+
+ .navigation a {
+ text-decoration: none;
+ color: #333;
+ padding: 10px 15px;
+ display: inline-block;
+ }
+
+ .content {
+ background: #fff;
+ padding: 20px;
+ min-height: 500px;
+ margin-bottom: 20px;
+ }
+
+ .footer {
+ background: #333;
+ color: #fff;
+ text-align: center;
+ padding: 10px 0;
+ position: relative;
+ bottom: 0;
+ width: 100%;
+ }
+
+ .footer a {
+ color: #fff;
+ margin: 0 10px;
+ text-decoration: none;
+ }
+
+ .product-list {
+ display: flex;
+ flex-wrap: wrap;
+ justify-content: space-between;
+ }
+
+ .product-item {
+ border: 1px solid #ddd;
+ margin-bottom: 20px;
+ padding: 15px;
+ width: 100%;
+ background: #fff;
+ }
+
+ .product-form {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ }
+
+ .count-input {
+ width: 50px;
+ padding: 5px;
+ margin: 0 10px;
+ }
+
+ .button {
+ background: #4CAF50;
+ color: white;
+ border: none;
+ padding: 8px 15px;
+ cursor: pointer;
+ }
+
+ .cart-table {
+ width: 100%;
+ border-collapse: collapse;
+ }
+
+ .cart-table th, .cart-table td {
+ padding: 10px;
+ text-align: left;
+ border-bottom: 1px solid #ddd;
+ }
+
+ .cart-table th {
+ background-color: #333;
+ color: white;
+ }
+ </style>
+</head>
+<body>
+ <div class="header">
+ <div class="container">
+ <div class="navigation">
+ <div>
+ <a href="main.php"> Home</a> |
+ <a href="main.php?page=products"> Products</a> |
+ <a href="main.php?page=cart"> Cart</a>
+ <?php if (isset($_SESSION['logged_in']) &&
+$_SESSION['logged_in'] === true): ?>
+ | <a href="main.php?page=profile"> Profile</a>
+ | <a href="main.php?page=logout"> Logout</a>
+ <?php else: ?>
+ | <a href="main.php?page=login"> Login</a>
+ <?php endif; ?>
+ </div>
+ </div>
+ </div>
+ </div>
+ <div class="container">
+ <div class="content">
+<?php
+// Products array (simulating database)
+$products = [
+ 1 => [
+ 'id' => 1,
+ 'title' => 'Cola',
+ 'description' => 'Refreshing carbonated drink',
+ 'price' => 1.50
+ ],
+ 2 => [
+ 'id' => 2,
+ 'title' => 'Fanta',
+ 'description' => 'Orange flavored carbonated drink',
+ 'price' => 1.50
+ ],
+ 3 => [
+ 'id' => 3,
+ 'title' => 'Sprite',
+ 'description' => 'Clear lemon-lime flavored carbonated drink',
+ 'price' => 1.50
+ ],
+ 4 => [
+ 'id' => 4,
+ 'title' => 'Nuts',
+ 'description' => 'Assorted nuts mix',
+ 'price' => 3.00
+ ]
+];
+// Processing adding product to cart
+if (isset($_POST['addIdInput'])) {
+ $id = (int)$_POST['addIdInput'];
+ $addCount = isset($_POST['addCountInput']) && $_POST['addCountInput']
+> 0
+ ? (int)$_POST['addCountInput']
+ : 1;
+
+ // Initialize cart if it doesn't exist
+ if (!isset($_SESSION['cart'])) {
+ $_SESSION['cart'] = [];
+ }
+
+ // Check if product is already in cart
+ $itemExists = false;
+ foreach ($_SESSION['cart'] as $key => $item) {
+ if ($item['id'] == $id) {
+ $_SESSION['cart'][$key]['count'] += $addCount;
+ $itemExists = true;
+ break;
+ }
+ }
+
+ // If product is not in cart, add it
+ if (!$itemExists) {
+ $_SESSION['cart'][] = [
+ 'id' => $id,
+ 'count' => $addCount
+ ];
+ }
+
+ // Redirect to cart page
+ header('Location: main.php?page=cart');
+ exit;
+}
+?>
+<h2>Our Products</h2>
+<div class="product-list">
+ <?php foreach ($products as $id => $product): ?>
+ <div class="product-item">
+ <div class="product-form">
+ <div>
+ <h3><?= $product['title'] ?></h3>
+ <p><?= $product['description'] ?></p>
+ <strong>Price: $<?= number_format($product['price'], 2)
+?></strong>
+ </div>
+
+ <form method="POST" action="main.php?page=products"
+class="add-to-cart-form">
+ <input type="hidden" name="addIdInput" value="<?= $id
+?>">
+ <input type="text" class="count-input"
+name="addCountInput" placeholder="1">
+ <input class="button" type="submit" value="Buy">
+ </form>
+ </div>
+ </div>
+ <?php endforeach; ?>
+</div>
+<?php
+// Products array (simulating database)
+$products = [
+ 1 => [
+ 'id' => 1,
+ 'title' => 'Cola',
+ 'description' => 'Refreshing carbonated drink',
+ 'price' => 1.50
+ ],
+ 2 => [
+ 'id' => 2,
+ 'title' => 'Fanta',
+ 'description' => 'Orange flavored carbonated drink',
+ 'price' => 1.50
+ ],
+ 3 => [
+ 'id' => 3,
+ 'title' => 'Sprite',
+ 'description' => 'Clear lemon-lime flavored carbonated drink',
+ 'price' => 1.50
+ ],
+ 4 => [
+ 'id' => 4,
+ 'title' => 'Nuts',
+ 'description' => 'Assorted nuts mix',
+ 'price' => 3.00
+ ]
+];
+// Processing removal of product from cart
+if (isset($_GET['remove'])) {
+ $removeId = (int)$_GET['remove'];
+
+ if (isset($_SESSION['cart'])) {
+ foreach ($_SESSION['cart'] as $key => $item) {
+ if ($item['id'] == $removeId) {
+ unset($_SESSION['cart'][$key]);
+ break;
+ }
+ }
+ }
+
+ // Redirect to cart page
+ header('Location: main.php?page=cart');
+ exit;
+}
+// Check if cart is empty
+if (empty($_SESSION['cart'])) {
+ echo '<h2>Your cart is empty</h2>';
+ echo '<p><a href="main.php?page=products">Go shopping</a></p>';
+} else {
+ // Display cart contents
+ echo '<h2>Cart</h2>';
+ ?>
+ <table class="cart-table">
+ <tr>
+ <th>ID</th>
+ <th>Name</th>
+ <th>Price</th>
+ <th>Quantity</th>
+ <th>Sum</th>
+ <th>Actions</th>
+ </tr>
+ <?php
+ $totalSum = 0;
+
+ foreach ($_SESSION['cart'] as $item) {
+ $id = $item['id'];
+ $count = $item['count'];
+
+ // Check if product exists in our "catalog"
+ if (isset($products[$id])) {
+ $product = $products[$id];
+ $sum = $product['price'] * $count;
+ $totalSum += $sum;
+ ?>
+ <tr>
+ <td><?= $id ?></td>
+ <td><?= $product['title'] ?></td>
+ <td>$<?= number_format($product['price'], 2) ?></td>
+ <td><?= $count ?></td>
+ <td>$<?= number_format($sum, 2) ?></td>
+ <td>
+ <a href="main.php?page=cart&remove=<?= $id
+?>"> </a>
+ </td>
+ </tr>
+ <?php
+ }
+ }
+ ?>
+ <tr>
+ <td colspan="4"><strong>Total:</strong></td>
+ <td colspan="2"><strong>$<?= number_format($totalSum, 2)
+?></strong></td>
+ </tr>
+ </table>
+
+ <div style="margin-top: 20px; text-align: right;">
+ <a href="main.php?page=products" class="button"
+style="background-color: #888; margin-right: 10px;">Continue Shopping</a>
+ <button class="button">Checkout</button>
+ </div>
+ <?php
+}
+?>
+<?php
+// Check if form submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+ // Simple validation
+ if (!empty($_POST['username']) && !empty($_POST['password'])) {
+ // In a real application, you would verify against a database
+ // For this example, we use a static array as mentioned in the
+task
+ $credentials = [
+ 'userName' => 'Test',
+ 'password' => '123123'
+ ];
+
+ // Check credentials
+ if ($_POST['username'] === $credentials['userName'] &&
+ $_POST['password'] === $credentials['password']) {
+
+ // Login successful
+ $_SESSION['logged_in'] = true;
+ $_SESSION['username'] = $_POST['username'];
+ $_SESSION['login_time'] = date('Y-m-d H:i:s');
+
+ // Redirect to products page
+ header('Location: main.php?page=products');
+ exit;
+ } else {
+ $error_message = "Invalid username or password";
+ }
+ } else {
+ $error_message = "Please fill in all fields";
+ }
+}
+?>
+<div style="max-width: 400px; margin: 0 auto; padding: 20px;">
+ <h2>Login</h2>
+
+ <?php if (isset($error_message)): ?>
+ <div style="background-color: #ffeeee; color: #cc0000; padding:
+10px; margin-bottom: 15px; border: 1px solid #cc0000;">
+ <?= $error_message ?>
+ </div>
+ <?php endif; ?>
+
+ <form method="POST" action="main.php?page=login">
+ <div style="margin-bottom: 15px;">
+ <label for="username">User Name:</label><br>
+ <input type="text" id="username" name="username"
+style="width: 100%; padding: 8px; box-sizing: border-box;">
+ </div>
+
+ <div style="margin-bottom: 15px;">
+ <label for="password">Password:</label><br>
+ <input type="password" id="password" name="password"
+style="width: 100%; padding: 8px; box-sizing: border-box;">
+ </div>
+
+ <div>
+ <button type="submit" class="button" style="width:
+100%;">Login</button>
+ </div>
+ </form>
+</div>
+<?php
+// Check if user is logged in
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+ // If not logged in, redirect to login page
+ header('Location: main.php?page=login');
+ exit;
+}
+// Initialize user profile data or load from session if exists
+if (!isset($_SESSION['profile'])) {
+ $_SESSION['profile'] = [
+ 'name' => '',
+ 'surname' => '',
+ 'birthday' => '',
+ 'brief_description' => '',
+ 'photo' => ''
+ ];
+}
+$profile = $_SESSION['profile'];
+// Process profile update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
+isset($_POST['save_profile'])) {
+ $errors = [];
+
+ // Validate name
+ if (empty($_POST['name'])) {
+ $errors[] = "Name is required";
+ }
+
+ // Validate surname
+ if (empty($_POST['surname'])) {
+ $errors[] = "Surname is required";
+ } elseif (str_word_count($_POST['surname']) < 2) {
+ $errors[] = "Surname must contain at least 2 words";
+ }
+
+ // Validate brief description
+ if (empty($_POST['brief_description'])) {
+ $errors[] = "Brief description is required";
+ } elseif (strlen($_POST['brief_description']) < 30) {
+ $errors[] = "Brief description must be at least 30 characters";
+ }
+
+ // Simple age check (must be at least 16)
+ if (!empty($_POST['birthday'])) {
+ $birthday = new DateTime($_POST['birthday']);
+ $now = new DateTime();
+ $age = $now->diff($birthday)->y;
+
+ if ($age < 16) {
+ $errors[] = "You must be at least 16 years old";
+ }
+ } else {
+ $errors[] = "Birthday is required";
+ }
+
+ // Photo upload handling (in a real application)
+ if (isset($_FILES['photo']) && $_FILES['photo']['error'] === 0) {
+ // File upload simulation - in a real application, you would:
+ // 1. Check file type (mime)
+ // 2. Check file size
+ // 3. Move the file to a permanent location
+ // 4. Save the file path in the user profile
+
+ // For simplicity, we just record that a photo was uploaded
+ $_SESSION['profile']['photo'] = 'photo_uploaded.jpg';
+ }
+
+ // If no errors, save profile
+ if (empty($errors)) {
+ $_SESSION['profile'] = [
+ 'name' => $_POST['name'],
+ 'surname' => $_POST['surname'],
+ 'birthday' => $_POST['birthday'],
+ 'brief_description' => $_POST['brief_description'],
+ 'photo' => $_SESSION['profile']['photo']
+ ];
+
+ $success_message = "Profile updated successfully";
+ }
+}
+?>
+<h2>User Profile</h2>
+<?php if (isset($errors) && !empty($errors)): ?>
+ <div style="background-color: #ffeeee; color: #cc0000; padding: 10px;
+margin-bottom: 15px; border: 1px solid #cc0000;">
+ <ul style="margin: 0; padding-left: 20px;">
+ <?php foreach ($errors as $error): ?>
+ <li><?= $error ?></li>
+ <?php endforeach; ?>
+ </ul>
+ </div>
+<?php endif; ?>
+<?php if (isset($success_message)): ?>
+ <div style="background-color: #eeffee; color: #006600; padding: 10px;
+margin-bottom: 15px; border: 1px solid #006600;">
+ <?= $success_message ?>
+ </div>
+<?php endif; ?>
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+ <div style="flex: 1; min-width: 300px;">
+ <form method="POST" action="main.php?page=profile"
+enctype="multipart/form-data">
+ <div style="margin-bottom: 15px;">
+ <label for="name">Name:</label><br>
+ <input type="text" id="name" name="name" value="<?=
+htmlspecialchars($profile['name']) ?>"
+ style="width: 100%; padding: 8px; box-sizing:
+border-box;">
+ </div>
+
+ <div style="margin-bottom: 15px;">
+ <label for="surname">Surname:</label><br>
+ <input type="text" id="surname" name="surname" value="<?=
+htmlspecialchars($profile['surname']) ?>"
+ style="width: 100%; padding: 8px; box-sizing:
+border-box;">
+ </div>
+
+ <div style="margin-bottom: 15px;">
+ <label for="birthday">Birthday:</label><br>
+ <input type="date" id="birthday" name="birthday"
+value="<?= htmlspecialchars($profile['birthday']) ?>"
+ style="width: 100%; padding: 8px; box-sizing:
+border-box;">
+ </div>
+
+ <div style="margin-bottom: 15px;">
+ <label for="brief_description">Brief
+description:</label><br>
+ <textarea id="brief_description" name="brief_description"
+ style="width: 100%; padding: 8px; box-sizing:
+border-box; height: 100px;"><?=
+htmlspecialchars($profile['brief_description']) ?></textarea>
+ </div>
+
+ <div style="margin-bottom: 15px;">
+ <label for="photo">Photo:</label><br>
+ <input type="file" id="photo" name="photo"
+accept="image/*"
+ style="width: 100%; padding: 8px; box-sizing:
+border-box;">
+ </div>
+
+ <div>
+ <button type="submit" name="save_profile" value="1"
+class="button">Save</button>
+ </div>
+ </form>
+ </div>
+
+ <div style="flex: 1; min-width: 300px; border: 1px solid #ddd;
+padding: 15px;">
+ <h3>Profile Preview</h3>
+
+ <div style="display: flex; align-items: flex-start; marginbottom: 15px;">
+ <div style="width: 150px; height: 150px; background-color:
+#eee; margin-right: 15px; display: flex; align-items: center; justifycontent: center;">
+ <?php if (!empty($profile['photo'])): ?>
+ <span>Photo uploaded</span>
+ <?php else: ?>
+ <span>No photo</span>
+ <?php endif; ?>
+ </div>
+
+ <div>
+ <p><strong>Name:</strong> <?=
+htmlspecialchars($profile['name']) ?></p>
+ <p><strong>Surname:</strong> <?=
+htmlspecialchars($profile['surname']) ?></p>
+ <p><strong>Birthday:</strong> <?=
+htmlspecialchars($profile['birthday']) ?></p>
+ </div>
+ </div>
+
+ <div>
+ <h4>Description:</h4>
+ <p><?= nl2br(htmlspecialchars($profile['brief_description']))
+?></p>
+ </div>
+ </div>
+</div>
+</div><!-- Close div.content -->
+ </div><!-- Close div.container -->
+
+ <div class="footer">
+ <div class="container">
+ <p>
+ <a href="main.php">Home</a> |
+ <a href="main.php?page=products">Products</a> |
+ <a href="main.php?page=cart">Cart</a> |
+ <a href="main.php?page=about">About Us</a>
+ </p>
+ <p>&copy; <?php echo date('Y'); ?> Online Store</p>
+ </div>
+ </div>
+</body>
+</html>
