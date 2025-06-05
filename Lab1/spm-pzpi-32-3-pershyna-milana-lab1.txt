@@ -26,107 +26,107 @@
 Ст. викл. кафедри ПІ
 Сокорчук І.П.
 
+
+
+
+
 Харків, 2025 р. 
 
-Лабораторна робота №1
+
+----------------------------------------------------------------
+1 ІСТОРІЯ ЗМІН
+№
+	Дата
+	Версія звіту
+	Опис змін та виправлень
+	1
+	03.05.2025
+	       0.1
+	Додано розділ “Завдання”
+	2
+	05.05.2025
+	28.  0.2
+	Додано розділи “Опис виконаної роботи” та підрозділ “Хід роботи” та “Висновки”
+	3
+	07.05.2025
+	2.1  0.3
+	  Додано “Додаток А”, “Додаток В”
+
+
+----------------------------------------------------------------
+
+
+2 ЗАВДАННЯ
 	1 Мета роботи:
 Ознайомитися з основними командами Bash для роботи з файлами та текстовими даними. Навчитися використовувати команди select, ls, awk, sort, uniq, tee, cat, sed, iconv тощо. Розробити Bash-скрипт для перетворення CSV файла розкладу занять у придатний для імпорту в Google Календар CSV формат. 
 	2 Задача:
 Розробити Bash-скрипт, який обробляє експортований із сайту https://cist.nure.ua/ розклад занять для всіх груп потоку в форматі CSV та перетворює його у формат CSV для завантаження в Google Календар https://support.google.com/. 
-	3 Хід роботи
+
+
+
+----------------------------------------------------------------
+
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ 
 Обробка ключів --help та –version 
 На початку реалізовані перевірки наявності допоміжних ключів для виводу довідкової інформації та версії скрипта: 
 
 show_help() { 
-
     echo "Використання: $0 [опції] [академічна_група] [файл_із_cist.csv]" 
-
     ... 
-
     exit 0 
 
 } 
 
 show_version() { 
-
     echo "Версія: 3.3" 
-
     echo "Дата: $(date +%d.%m.%Y)" 
-
     exit 0 
-
 } 
 
 
 Обробка помилок та повідомлення 
 
- 
-
 Була реалізована функція для виводу повідомлень про помилки у стандартний потік помилок: 
-
 handle_error() { 
-
     local error_code=$1 
-
     local error_message=$2 
-
     echo "Помилка: $error_message" >&2 
-
     exit $error_code 
-
 } 
 
  
-
 Вибір файлу за допомогою select 
 У випадку, якщо файл не передано, скрипт пропонує вибрати доступний CSV-файл з директорії: 
 
 select_file() { 
-
     echo "Доступні CSV-файли:" >&2 
-
     select file in $(ls *.csv 2>/dev/null); do 
-
         if [ -n "$file" ]; then 
-
             echo "$file" 
-
             return 0 
-
         else 
-
             handle_error 2 "Невірний вибір. Спробуйте ще раз." 
-
         fi 
-
     done 
-
 } 
 
- 
 
 Вибір академічної групи 
 Після вибору або задання файлу, скрипт аналізує наявні групи в ньому і пропонує вибрати потрібну: 
-
 select_group() { 
-
     local file=$1 
-
     ... 
-
     local groups=$(grep -o "ПЗПІ-[0-9][0-9]-[0-9]" "$file" | sort -u) 
-
     ... 
-
 } 
 
 Фільтрація даних для вибраної групи 
 Після вибору групи скрипт відбирає лише ті рядки, які їй відповідають (в повній версії коду — через awk, grep або sed). 
 
-
 Формування поля Subject 
 Було реалізовано видалення префіксу з назви групи в полі теми заняття, а також додано номер заняття: 
-
 
 # Псевдокод: видалення назви групи з теми 
 subject=$(echo "$theme" | sed "s/^$group - //") 
@@ -144,647 +144,310 @@ start_time=$(date -d "$start" "+%I:%M %p")
 Команда для локального виконання скрипта: 
 php -S localhost:8000 pzpi-23-3-pershyna-milana-task2.php 
 
-Висновок 
+
+----------------------------------------------------------------
+
+
+
+
+ВИСНОВКИ 
  У результаті виконання роботи було засвоєно основні команди Bash для роботи з файлами та текстовими даними, зокрема select, ls, awk, sort, uniq, tee, cat, sed, iconv тощо. Також було розроблено Bash-скрипт, який автоматично перетворює CSV-файл розкладу занять у формат, придатний для імпорту в Google Календар, що підтверджує набуті практичні навички обробки даних у командному рядку
 
+
+
+
+----------------------------------------------------------------
+
+
 ДОДАТОК А
+Відеозапис
+Відеозапис презентації результатів лабораторної роботи: https://www.youtube.com/watch?v=jcpFFqNR2TQ
+Хронологічний опис відеозапису:
+00:00 - вступ
+00:35 - результат вмконання скрипту
+00:57 - початок пояснення коду
+01:00 - функція виводу допомоги
+01:20 - функція виводу версії
+01:32 - функція виводу помилки
+01:47 - функція виводу анімації
+02:35 - функція вибору файлу
+03:07 - функція вибору групи
+04:00 - пояснення основної функції формування нового файлу розкладу
+12:45 - обробка вхідних параметрів
+14:48 - виклик основної функції
+
+
+
+----------------------------------------------------------------
+
+
+
+ДОДАТОК В
 Повний код програми 
-#!/bin/bash 
-
- 
-
-# Скрипт для перетворення CSV-файлу з розкладом CIST до формату для імпорту в Google Календар 
-
-# Назва скрипта: pershyna-milana-task2.sh 
-
- 
-
-# Функція для відображення довідки 
-
-show_help() { 
-
-    echo "Використання: $0 [опції] [академічна_група] [файл_із_cist.csv]" 
-
-    echo "" 
-
-    echo "Опції:" 
-
-    echo "  --help     Показати довідку та вийти" 
-
-    echo "  --version  Показати версію та вийти" 
-
-    echo "  -q, --quiet  Не виводити інформацію в стандартний потік виведення" 
-
-    echo "" 
-
-    echo "Приклад використання:" 
-
-    echo "  $0 'ПЗПІ-23-1' TimeTable_16_03_2025.csv" 
-
-    echo "  $0 --help" 
-
-    echo "  $0 --version" 
-
-    echo "" 
-
-    exit 0 
-
-} 
-
- 
-
-# Функція для відображення версії 
-
-show_version() { 
-
-    echo "Версія: 3.3" 
-
-    echo "Дата: $(date +%d.%m.%Y)" 
-
-    exit 0 
-
-} 
-
- 
-
-# Функція для обробки помилок 
-
-handle_error() { 
-
-    local error_code=$1 
-
-    local error_message=$2 
-
-     
-
-    echo "Помилка: $error_message" >&2 
-
-    exit $error_code 
-
-} 
-
- 
-
-# Функція для анімації завантаження 
-
-show_animation() { 
-
-    local pid=$1 
-
-    local message=$2 
-
-    local symbols=('⣾' '⣽' '⣻' '⢿' '⡿' '⣟' '⣯' '⣷') 
-
-    local delay=0.1 
-
-     
-
-    while kill -0 $pid 2>/dev/null; do 
-
-        for symbol in "${symbols[@]}"; do 
-
-            echo -ne "\r\033[K$symbol $message" 
-
-            sleep $delay 
-
-        done 
-
-    done 
-
-    echo -ne "\r\033[K" 
-
-} 
-
- 
-
-# Функція для вибору файлу 
-
-select_file() { 
-
-    echo "Доступні CSV-файли:" >&2 
-
-    select file in $(ls *.csv 2>/dev/null); do 
-
-        if [ -n "$file" ]; then 
-
-            echo "$file" 
-
-            return 0 
-
-        else 
-
-            handle_error 2 "Невірний вибір. Спробуйте ще раз." 
-
-        fi 
-
-    done 
-
-} 
-
- 
-
-# Функція для вибору академічної групи 
-
-select_group() { 
-
-    local file=$1 
-
-     
-
-    # Перевірка наявності файлу 
-
-    if [ ! -f "$file" ]; then 
-
-        handle_error 2 "Файл '$file' не знайдено" 
-
-    fi 
-
-     
-
-    # Отримання списку груп 
-
-    local groups=$(grep -o "ПЗПІ-[0-9][0-9]-[0-9]" "$file" | sort -u) 
-
-     
-
-    if [ -z "$groups" ]; then 
-
-        handle_error 3 "У файлі '$file' не знайдено жодної академічної групи" 
-
-    fi 
-
-     
-
-    echo "Доступні академічні групи:" >&2 
-
-    select group in $groups; do 
-
-        if [ -n "$group" ]; then 
-
-            echo "$group" 
-
-            return 0 
-
-        else 
-
-            handle_error 3 "Невірний вибір. Спробуйте ще раз." 
-
-        fi 
-
-    done 
-
-} 
-
- 
-
-# Функція для створення CSV-файлу для Google Календаря 
-
-process_file() { 
-
-    local group=$1 
-
-    local input_file=$2 
-
-    local quiet=$3 
-
-     
-
-    if [ "$quiet" != "true" ]; then 
-
-        echo "Починаю обробку файлу: $input_file" 
-
-        echo "Пошук даних для групи: $group" 
-
-    fi 
-
-     
-
-    # Створюємо підпроцес для обробки даних 
-
-    { 
-
-        # Формування назви вихідного файлу 
-
-        local date_part=$(echo "$input_file" | grep -o '[0-9]\+_[0-9]\+_[0-9]\+' | head -1) 
-
-        local output_file="Google_TimeTable_${date_part}.csv" 
-
-         
-
-        # Створення тимчасового файлу 
-
-        local temp_file=$(mktemp) 
-
-         
-
-        # Додавання заголовків для Google Календаря 
-
-        echo "Subject,Start Date,Start Time,End Date,End Time,Description" > "$temp_file" 
-
-         
-
-        # Підготовка лічильників для кожного типу заняття і дисципліни 
-
-        declare -A lesson_counters 
-
-         
-
-        # Обробка файлу 
-
-        grep -i "$group" "$input_file" | while IFS= read -r line; do 
-
-            # Пропускаємо заголовок 
-
-            if [[ "$line" == *"Тема"* ]]; then 
-
-                continue 
-
-            fi 
-
-             
-
-            # Видалення лапок 
-
-            line=$(echo "$line" | sed 's/"//g') 
-
-             
-
-            # Розбиваємо рядок на частини 
-
-            IFS=, read -r subject start_date start_time end_date end_time description remainder <<< "$line" 
-
-             
-
-            # Перевірка чи відповідає рядок групі 
-
-            if [[ "$subject" == *"$group"* ]]; then 
-
-                # Отримуємо частину після назви групи (дисципліна і тип заняття) 
-
-                clean_subject=$(echo "$subject" | sed "s/$group - //;s/ $group$//;s/ $group //") 
-
-                 
-
-                # Зберігаємо оригінальний предмет для опису 
-
-                original_subject=$clean_subject 
-
-                 
-
-                # Визначаємо тип заняття та дисципліну 
-
-                local lesson_type="" 
-
-                if [[ "$clean_subject" == *"Лб"* ]]; then 
-
-                    lesson_type="Лб" 
-
-                elif [[ "$clean_subject" == *"Пз"* ]]; then 
-
-                    lesson_type="Пз" 
-
-                elif [[ "$clean_subject" == *"Лк"* ]]; then 
-
-                    lesson_type="Лк" 
-
-                fi 
-
-                 
-
-                local discipline=$(echo "$clean_subject" | awk '{print $1}') 
-
-                local key="${discipline}_${lesson_type}" 
-
-                 
-
-                # Збільшуємо лічильник для цього типу заняття і дисципліни 
-
-                if [[ -z "${lesson_counters[$key]}" ]]; then 
-
-                    lesson_counters[$key]=1 
-
-                else 
-
-                    lesson_counters[$key]=$((${lesson_counters[$key]} + 1)) 
-
-                fi 
-
-                 
-
-                # Формуємо назву для Subject 
-
-                clean_subject="${clean_subject} #${lesson_counters[$key]}" 
-
-                 
-
-                # Форматування дат (з "DD.MM.YYYY" в "MM/DD/YYYY") 
-
-                local formatted_start_date=$(echo "$start_date" | awk -F. '{print $2"/"$1"/"$3}') 
-
-                local formatted_end_date=$(echo "$end_date" | awk -F. '{print $2"/"$1"/"$3}') 
-
-                 
-
-                # Формуємо опис (Description) 
-
-                local full_description="${group} - ${original_subject} - ${description}" 
-
-                 
-
-                # Виведення форматованого рядка 
-
-                echo "$clean_subject,$formatted_start_date,$start_time,$formatted_end_date,$end_time,$full_description" >> "$temp_file" 
-
-            fi 
-
-             
-
-            # Додаємо невелику затримку для імітації роботи 
-
-            sleep 0.01 
-
-        done 
-
-         
-
-        # Перевірка чи є дані у тимчасовому файлі (більше ніж 1 рядок - тільки заголовок) 
-
-        if [ $(wc -l < "$temp_file") -le 1 ]; then 
-
-            rm "$temp_file" 
-
-            echo "Помилка: Групу '$group' не знайдено у файлі '$input_file'" >&2 
-
-            exit 4 
-
-        fi 
-
-         
-
-        # Перенесення даних з тимчасового файлу у вихідний 
-
-        mv "$temp_file" "$output_file" 
-
-         
-
-        # Чекаємо ще трохи для гарного ефекту завершення 
-
-        sleep 1 
-
-    } & 
-
-     
-
-    # Отримуємо PID підпроцесу 
-
-    local pid=$! 
-
-     
-
-    # Показуємо анімацію, поки підпроцес працює 
-
-    if [ "$quiet" != "true" ]; then 
-
-        show_animation $pid "Трансформую CSV-файл для Google Календаря..." 
-
-    fi 
-
-     
-
-    # Чекаємо завершення підпроцесу 
-
-    wait $pid 
-
-     
-
-    # Перевіряємо код завершення підпроцесу 
-
-    local exit_code=$? 
-
-    if [ $exit_code -ne 0 ]; then 
-
-        exit $exit_code 
-
-    fi 
-
-     
-
-    # Формування назви вихідного файлу (для повідомлення) 
-
-    local date_part=$(echo "$input_file" | grep -o '[0-9]\+_[0-9]\+_[0-9]\+' | head -1) 
-
-    local output_file="Google_TimeTable_${date_part}.csv" 
-
-     
-
-    if [ "$quiet" != "true" ]; then 
-
-        echo "Обробку успішно завершено!" 
-
-        echo "Файл '$output_file' успішно створено для групи '$group'" 
-
-    fi 
-
-     
-
-    return 0 
-
-} 
-
- 
-
-# Перевірка та обробка параметрів командного рядка 
-
-QUIET=false 
-
- 
-
-# Якщо немає параметрів, показати допомогу 
-
-if [ $# -eq 0 ]; then 
-
-    show_help 
-
-fi 
-
- 
-
-# Обробка параметрів 
-
-while [ $# -gt 0 ]; do 
-
-    case "$1" in 
-
-        --help) 
-
-            show_help 
-
-            ;; 
-
-        --version) 
-
-            show_version 
-
-            ;; 
-
-        -q|--quiet) 
-
-            QUIET=true 
-
-            shift 
-
-            ;; 
-
-        -*) 
-
-            handle_error 1 "Невідома опція: $1" 
-
-            ;; 
-
-        *) 
-
-            # Якщо це перший позиційний параметр, це група 
-
-            if [ -z "$GROUP" ]; then 
-
-                GROUP="$1" 
-
-                shift 
-
-            # Якщо це другий позиційний параметр, це файл 
-
-            elif [ -z "$FILE" ]; then 
-
-                FILE="$1" 
-
-                shift 
-
-            else 
-
-                handle_error 1 "Зайвий параметр: $1" 
-
-            fi 
-
-            ;; 
-
-    esac 
-
-done 
-
- 
-
-# Якщо файл не вказано, запропонувати вибір 
-
-if [ -z "$FILE" ]; then 
-
-    if [ "$QUIET" != "true" ]; then 
-
-        FILE=$(select_file) 
-
-    else 
-
-        # У тихому режимі спробуємо знайти найновіший файл 
-
-        FILE=$(ls -t *.csv 2>/dev/null | head -1) 
-
-        if [ -z "$FILE" ]; then 
-
-            handle_error 2 "Не знайдено жодного файлу розкладу" 
-
-        fi 
-
-    fi 
-
-fi 
-
- 
-
-# Перевірка існування файлу 
-
-if [ ! -f "$FILE" ]; then 
-
-    handle_error 2 "Файл '$FILE' не знайдено" 
-
-fi 
-
- 
-
-# Якщо група не вказана, запропонувати вибір 
-
-if [ -z "$GROUP" ]; then 
-
-    if [ "$QUIET" != "true" ]; then 
-
-        GROUP=$(select_group "$FILE") 
-
-    else 
-
-        # У тихому режимі спробуємо знайти першу групу 
-
-        GROUP=$(grep -o "ПЗПІ-[0-9][0-9]-[0-9]" "$FILE" | sort -u | head -1) 
-
-        if [ -z "$GROUP" ]; then 
-
-            handle_error 3 "У файлі '$FILE' не знайдено жодної академічної групи" 
-
-        fi 
-
-    fi 
-
-fi 
-
- 
-
-# Перевірка на наявність однієї групи 
-
-if [ -z "$GROUP" ]; then 
-
-    GROUP_COUNT=$(grep -o "ПЗПІ-[0-9][0-9]-[0-9]" "$FILE" | sort -u | wc -l) 
-
-    if [ "$GROUP_COUNT" -eq 1 ]; then 
-
-        GROUP=$(grep -o "ПЗПІ-[0-9][0-9]-[0-9]" "$FILE" | sort -u | head -1) 
-
-        if [ "$QUIET" != "true" ]; then 
-
-            echo "В файлі присутня лише одна група: $GROUP. Використовуємо її для обробки." 
-
-        fi 
-
-    fi 
-
-fi 
-
- 
-
-# Показуємо початок роботи скрипту 
-
-if [ "$QUIET" != "true" ]; then 
-
-    echo "Починаю роботу скрипту..." 
-
-    echo "Вибрана група: $GROUP" 
-
-    echo "Вхідний файл: $FILE" 
-
-fi 
-
- 
-
-# Обробка файлу 
-
-process_file "$GROUP" "$FILE" "$QUIET" 
-
- 
-
-# Повідомлення про завершення роботи скрипту 
-
-if [ "$QUIET" != "true" ]; then 
-
-    echo "Скрипт успішно завершив роботу!" 
-
-fi 
-
- 
-
-exit 0 
+1 #!/bin/bash 
+2 # Скрипт для перетворення CSV-файлу з розкладом CIST до формату для імпорту в Google Календар 
+3 # Назва скрипта: pershyna-milana-task2.sh 
+4 # Функція для відображення довідки 
+5 show_help() { 
+6     echo "Використання: $0 [опції] [академічна_група] [файл_із_cist.csv]" 
+7     echo "" 
+8     echo "Опції:" 
+9     echo "  --help     Показати довідку та вийти" 
+10     echo "  --version  Показати версію та вийти" 
+11     echo "  -q, --quiet  Не виводити інформацію в стандартний потік виведення" 
+12     echo "" 
+13     echo "Приклад використання:" 
+14     echo "  $0 'ПЗПІ-23-1' TimeTable_16_03_2025.csv" 
+15     echo "  $0 --help" 
+16     echo "  $0 --version" 
+17     echo "" 
+18     exit 0 
+19 } 
+20 # Функція для відображення версії 
+21 show_version() { 
+22     echo "Версія: 3.3" 
+23     echo "Дата: $(date +%d.%m.%Y)" 
+24     exit 0 
+25 } 
+26 # Функція для обробки помилок 
+27 handle_error() { 
+28     local error_code=$1 
+29     local error_message=$2 
+30     echo "Помилка: $error_message" >&2 
+31     exit $error_code 
+32 } 
+33 # Функція для анімації завантаження 
+34 show_animation() { 
+35     local pid=$1 
+36     local message=$2 
+37     local symbols=('⣾' '⣽' '⣻' '⢿' '⡿' '⣟' '⣯' '⣷') 
+38     local delay=0.1 
+39     while kill -0 $pid 2>/dev/null; do 
+40         for symbol in "${symbols[@]}"; do 
+41             echo -ne "\r\033[K$symbol $message" 
+42             sleep $delay 
+43         done 
+44     done 
+45     echo -ne "\r\033[K" 
+46 } 
+47 # Функція для вибору файлу 
+48 select_file() { 
+49     echo "Доступні CSV-файли:" >&2 
+50     select file in $(ls *.csv 2>/dev/null); do 
+51         if [ -n "$file" ]; then 
+52             echo "$file" 
+53             return 0 
+54         else 
+55             handle_error 2 "Невірний вибір. Спробуйте ще раз." 
+56         fi 
+57     done 
+58 } 
+59 # Функція для вибору академічної групи 
+60 select_group() { 
+61     local file=$1 
+62     # Перевірка наявності файлу 
+63     if [ ! -f "$file" ]; then 
+64         handle_error 2 "Файл '$file' не знайдено" 
+65     fi 
+66     # Отримання списку груп 
+67     local groups=$(grep -o "ПЗПІ-[0-9][0-9]-[0-9]" "$file" | sort -u) 
+68     if [ -z "$groups" ]; then 
+69         handle_error 3 "У файлі '$file' не знайдено жодної академічної групи" 
+70     fi 
+71     echo "Доступні академічні групи:" >&2 
+72     select group in $groups; do 
+73         if [ -n "$group" ]; then 
+74             echo "$group" 
+75             return 0 
+76         else 
+77             handle_error 3 "Невірний вибір. Спробуйте ще раз." 
+78         fi 
+79     done 
+80 } 
+81 # Функція для створення CSV-файлу для Google Календаря 
+82 process_file() { 
+83     local group=$1 
+84     local input_file=$2 
+85     local quiet=$3 
+86     if [ "$quiet" != "true" ]; then 
+87         echo "Починаю обробку файлу: $input_file" 
+88         echo "Пошук даних для групи: $group" 
+89     fi 
+90     # Створюємо підпроцес для обробки даних 
+91     { 
+92         # Формування назви вихідного файлу 
+93         local date_part=$(echo "$input_file" | grep -o '[0-9]\+_[0-9]\+_[0-9]\+' | head -1) 
+94         local output_file="Google_TimeTable_${date_part}.csv" 
+95         # Створення тимчасового файлу 
+96         local temp_file=$(mktemp) 
+97         # Додавання заголовків для Google Календаря 
+98         echo "Subject,Start Date,Start Time,End Date,End Time,Description" > "$temp_file" 
+99         # Підготовка лічільників для кожного типу заняття і дисципліни 
+100         declare -A lesson_counters 
+101         # Обробка файлу 
+102         grep -i "$group" "$input_file" | while IFS= read -r line; do 
+103             # Пропускаємо заголовок 
+104             if [[ "$line" == *"Тема"* ]]; then 
+105                 continue 
+106             fi 
+107             # Видалення лапок 
+108             line=$(echo "$line" | sed 's/"//g') 
+109             # Розбиваємо рядок на частини 
+110             IFS=, read -r subject start_date start_time end_date end_time description remainder <<< "$line" 
+111             # Перевірка чи відповідає рядок групі 
+112             if [[ "$subject" == *"$group"* ]]; then 
+113                 # Отримуємо частину після назви групи (дисципліна і тип заняття) 
+114                 clean_subject=$(echo "$subject" | sed "s/$group - //;s/ $group$//;s/ $group //") 
+115                 # Зберігаємо оригінальний предмет для опису 
+116                 original_subject=$clean_subject 
+117                 # Визначаємо тип заняття та дисципліну 
+118                 local lesson_type="" 
+119                 if [[ "$clean_subject" == *"Лб"* ]]; then 
+120                     lesson_type="Лб" 
+121                 elif [[ "$clean_subject" == *"Пз"* ]]; then 
+122                     lesson_type="Пз" 
+123                 elif [[ "$clean_subject" == *"Лк"* ]]; then 
+124                     lesson_type="Лк" 
+125                 fi 
+126                 local discipline=$(echo "$clean_subject" | awk '{print $1}') 
+127                 local key="${discipline}_${lesson_type}" 
+128                 # Збільшуємо лічільник для цього типу заняття і дисципліни 
+129                 if [[ -z "${lesson_counters[$key]}" ]]; then 
+130                     lesson_counters[$key]=1 
+131                 else 
+132                     lesson_counters[$key]=$((${lesson_counters[$key]} + 1)) 
+133                 fi 
+134                 # Формуємо назву для Subject 
+135                 clean_subject="${clean_subject} #${lesson_counters[$key]}" 
+136                 # Форматування дат (з "DD.MM.YYYY" в "MM/DD/YYYY") 
+137                 local formatted_start_date=$(echo "$start_date" | awk -F. '{print $2"/"$1"/"$3}') 
+138                 local formatted_end_date=$(echo "$end_date" | awk -F. '{print $2"/"$1"/"$3}') 
+139                 # Формуємо опис (Description) 
+140                 local full_description="${group} - ${original_subject} - ${description}" 
+141                 # Виведення форматованого рядка 
+142                 echo "$clean_subject,$formatted_start_date,$start_time,$formatted_end_date,$end_time,$full_description" >> "$temp_file" 
+143             fi 
+144             # Додаємо невелику затримку для імітації роботи 
+145             sleep 0.01 
+146         done 
+147         # Перевірка чи є дані у тимчасовому файлі (більше ніж 1 рядок - тільки заголовок) 
+148         if [ $(wc -l < "$temp_file") -le 1 ]; then 
+149             rm "$temp_file" 
+150             echo "Помилка: Групу '$group' не знайдено у файлі '$input_file'" >&2 
+151             exit 4 
+152         fi 
+153         # Перенесення даних з тимчасового файлу у вихідний 
+154         mv "$temp_file" "$output_file" 
+155         # Чекаємо ще трохи для гарного ефекту завершення 
+156         sleep 1 
+157     } & 
+158     # Отримуємо PID підпроцесу 
+159     local pid=$! 
+160     # Показуємо анімацію, поки підпроцес працює 
+161     if [ "$quiet" != "true" ]; then 
+162         show_animation $pid "Трансформую CSV-файл для Google Календаря..." 
+163     fi 
+164     # Чекаємо завершення підпроцесу 
+165     wait $pid 
+166     # Перевіряємо код завершення підпроцесу 
+167     local exit_code=$? 
+168     if [ $exit_code -ne 0 ]; then 
+169         exit $exit_code 
+170     fi 
+171     # Формування назви вихідного файлу (для повідомлення) 
+172     local date_part=$(echo "$input_file" | grep -o '[0-9]\+_[0-9]\+_[0-9]\+' | head -1) 
+173     local output_file="Google_TimeTable_${date_part}.csv" 
+174     if [ "$quiet" != "true" ]; then 
+175         echo "Обробку успішно завершено!" 
+176         echo "Файл '$output_file' успішно створено для групи '$group'" 
+177     fi 
+178     return 0 
+179 } 
+180 # Перевірка та обробка параметрів командного рядка 
+181 QUIET=false 
+182 # Якщо немає параметрів, показати допомогу 
+183 if [ $# -eq 0 ]; then 
+184     show_help 
+185 fi 
+186 # Обробка параметрів 
+187 while [ $# -gt 0 ]; do 
+188     case "$1" in 
+189         --help) 
+190             show_help 
+191             ;; 
+192         --version) 
+193             show_version 
+194             ;; 
+195         -q|--quiet) 
+196             QUIET=true 
+197             shift 
+198             ;; 
+199         -*) 
+200             handle_error 1 "Невідома опція: $1" 
+201             ;; 
+202         *) 
+203             # Якщо це перший позиційний параметр, це група 
+204             if [ -z "$GROUP" ]; then 
+205                 GROUP="$1" 
+206                 shift 
+207             # Якщо це другий позиційний параметр, це файл 
+208             elif [ -z "$FILE" ]; then 
+209                 FILE="$1" 
+210                 shift 
+211             else 
+212                 handle_error 1 "Зайвий параметр: $1" 
+213             fi 
+214             ;; 
+215     esac 
+216 done 
+217 # Якщо файл не вказано, запропонувати вибір 
+218 if [ -z "$FILE" ]; then 
+219     if [ "$QUIET" != "true" ]; then 
+220         FILE=$(select_file) 
+221     else 
+222         # У тихому режимі спробуємо знайти найновіший файл 
+223         FILE=$(ls -t *.csv 2>/dev/null | head -1) 
+224         if [ -z "$FILE" ]; then 
+225             handle_error 2 "Не знайдено жодного файлу розкладу" 
+226         fi 
+227     fi 
+228 fi 
+229 # Перевірка існування файлу 
+230 if [ ! -f "$FILE" ]; then 
+231     handle_error 2 "Файл '$FILE' не знайдено" 
+232 fi 
+233 # Якщо група не вказана, запропонувати вибір 
+234 if [ -z "$GROUP" ]; then 
+235     if [ "$QUIET" != "true" ]; then 
+236         GROUP=$(select_group "$FILE") 
+237     else 
+238         # У тихому режимі спробуємо знайти першу групу 
+239         GROUP=$(grep -o "ПЗПІ-[0-9][0-9]-[0-9]" "$FILE" | sort -u | head -1) 
+240         if [ -z "$GROUP" ]; then 
+241             handle_error 3 "У файлі '$FILE' не знайдено жодної академічної групи" 
+242         fi 
+243     fi 
+244 fi 
+245 # Перевірка на наявність однієї групи 
+246 if [ -z "$GROUP" ]; then 
+247     GROUP_COUNT=$(grep -o "ПЗПІ-[0-9][0-9]-[0-9]" "$FILE" | sort -u | wc -l) 
+248     if [ "$GROUP_COUNT" -eq 1 ]; then 
+249         GROUP=$(grep -o "ПЗПІ-[0-9][0-9]-[0-9]" "$FILE" | sort -u | head -1) 
+250         if [ "$QUIET" != "true" ]; then 
+251             echo "В файлі присутня лише одна група: $GROUP. Використовуємо її для обробки." 
+252         fi 
+253     fi 
+254 fi 
+255 # Показуємо початок роботи скрипту 
+256 if [ "$QUIET" != "true" ]; then 
+257     echo "Починаю роботу скрипту..." 
+258     echo "Вибрана група: $GROUP" 
+259     echo "Вхідний файл: $FILE" 
+260 fi 
+261 # Обробка файлу 
+262 process_file "$GROUP" "$FILE" "$QUIET" 
+263 # Повідомлення про завершення роботи скрипту 
+264 if [ "$QUIET" != "true" ]; then 
+265     echo "Скрипт успішно завершив роботу!" 
+266 fi 
+267 exit 0
