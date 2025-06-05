@@ -16,6 +16,7 @@
 
 
 
+https://youtu.be/OKPqDbkMeTw
 
 
 Виконала:
@@ -26,591 +27,341 @@
 Ст. викл. кафедри ПІ
 Сокорчук І.П.
 
+
+
+
 Харків, 2025 р. 
 
-Лабораторна робота №2
+
+
+
+----------------------------------------------------------------
+
+
+1 ІСТОРІЯ ЗМІН
+№
+	Дата
+	Версія звіту
+	Опис змін та виправлень
+	1
+	07.05.2025
+	       0.1
+	Додано розділ “Завдання”
+	2
+	10.05.2025
+	28.  0.2
+	Додано розділи “Опис виконаної роботи” та підрозділ “Хід роботи” та “Висновки”
+	3
+	14.05.2025
+	2.1  0.3
+	  Додано “Додаток А”, “Додаток В”
+
+
+
+----------------------------------------------------------------
+
+
+2 ЗАВДАННЯ
 	1 Мета роботи:
 Метою лабораторної роботи є створення інтерактивного консольного застосунку мовою PHP, що моделює роботу продовольчого магазину "Весна". Завдання дозволяє закріпити навички роботи з масивами, умовними конструкціями, циклами, організацією користувацького вводу, а також реалізації простого інтерфейсу у терміналі. Крім того, мета включає опрацювання валідації введених даних та збереження інформації про покупки у структурі "кошик". 
 	2 Задача:
 В рамках завдання потрібно розробити консольну програму, яка виконує роль торгової системи з можливістю вибору товарів, розрахунку підсумкової вартості, налаштування профілю користувача та коректного завершення роботи. Особливу увагу слід приділити перевіркам введених даних, динамічному оновленню кошика та відображенню чеків. Програма повинна забезпечувати зручну взаємодію користувача з системою через просте текстове меню та реагувати на всі помилки користувацького вводу відповідними повідомленнями. 
-	3 Хід роботи 
+	
+
+
+----------------------------------------------------------------
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ 
 Виведення головного меню та обробка команд користувача: 
 
  
-
 Основний цикл програми реалізований у функції main(), яка забезпечує безперервне відображення меню та виклик функцій залежно від команди: 
-
 switch ($command) { 
-
     case '0': 
-
         echo "Дякуємо за покупки! До побачення!\n"; 
-
         exit(0); 
-
     case '1': 
-
         selectProducts(); 
-
         break; 
-
     case '2': 
-
         showReceipt(); 
-
         break; 
-
     case '3': 
-
         manageProfile(); 
-
         break; 
-
     default: 
-
         echo "ПОМИЛКА! Введіть правильну команду\n"; 
-
         break; 
-
 } 
 
  
-
- 
-
 Вибір товарів та оновлення кошика: 
 
- 
 
 Функція selectProducts() дозволяє переглядати перелік товарів, додавати або видаляти їх із кошика. У випадку неправильного номера або кількості виводиться повідомлення про помилку: 
 
 if (!isset($products[$productId])) { 
-
     echo "ПОМИЛКА! ВКАЗАНО НЕПРАВИЛЬНИЙ НОМЕР ТОВАРУ\n"; 
-
     continue; 
-
 } 
-
- 
-
 if ($quantity === 0) { 
-
     unset($cart[$productId]); 
-
     echo "ВИДАЛЯЮ З КОШИКА\n"; 
-
 } else { 
-
     $cart[$productId] = [...]; 
-
 } 
 
- 
 
 Відображення рахунку: 
 
- 
-
 Після введення команди "2", функція showReceipt() виводить список придбаних товарів, їхню кількість, індивідуальну та загальну вартість: 
-
 foreach ($cart as $id => $item) { 
-
     $total += $item['price'] * $item['quantity']; 
-
     echo "{$n} {$item['name']} {$item['price']} {$item['quantity']} {$item['price'] * $item['quantity']}\n"; 
-
 } 
 
 echo "РАЗОМ ДО CПЛАТИ: $total\n"; 
 
- 
 
 Налаштування профілю користувача: 
-
- 
-
 У функції manageProfile() користувач вводить ім’я та вік. Присутні перевірки на коректність: 
-
 if (!preg_match('/[а-яА-Яa-zA-Z]/u', $name)) { 
-
     echo "ПОМИЛКА! Імʼя повинно містити хоча б одну літеру.\n"; 
-
     return; 
-
 } 
 
 if ($age < 7 || $age > 150) { 
-
     echo "ПОМИЛКА! Вік повинен бути від 7 до 150 років.\n"; 
-
     return; 
-
 } 
 
- 
 
 Команда для локального виконання скрипта: 
 php -S localhost:8000 pzpi-23-3-pershyna-milana-task3.php 
 
 
-Висновок 
+
+
+
+----------------------------------------------------------------
+
+
+
+ВИСНОВКИ 
 
  У ході виконання лабораторної роботи було реалізовано консольний застосунок магазину, який демонструє базові принципи роботи з умовами, циклами та масивами у PHP. Програма дозволяє обирати товари, керувати кошиком, переглядати рахунок, а також налаштовувати профіль користувача з урахуванням валідації введених даних. Таким чином, поставленої мети досягнуто — було закріплено навички створення інтерфейсних консолей і обробки вводу у середовищі командного рядка. 
 
-ДОДАТОК А 
+
+----------------------------------------------------------------
+
+
+ДОДАТОК А
+Відеозапис
+Відеозапис презентації результатів лабораторної роботи: https://youtu.be/OKPqDbkMeTw
+Хронологічний опис відеозапису:
+00:00 - вступ
+00:23 - запуск скрипту
+02:37 - початок пояснення коду
+02:58 - стартові змінні
+03:37 - пояснення головної функції 
+04:27 - пояснення функції відображення головного меню
+04:44 - пояснення функції вибору товарів
+07:06 - пояснення функції відображення списку продуктів
+07:37 - пояснення функції відображення кошику
+07:58 - пояснення функції відображення рахунку
+09:16 - пояснення функції налаштування профілю
+10:00 - запуск програми
+
+
+
+----------------------------------------------------------------
+
+
+ДОДАТОК В 
 Повний код програми 
-<?php 
-
- 
-
-// Кодування для коректного відображення кирилиці в терміналі 
-
-system('chcp 65001'); 
-
- 
-
-// Товари в магазині 
-
-$products = [ 
-
-    1 => ['name' => 'Молоко пастеризоване', 'price' => 12], 
-
-    2 => ['name' => 'Хліб чорний', 'price' => 9], 
-
-    3 => ['name' => 'Сир білий', 'price' => 21], 
-
-    4 => ['name' => 'Сметана 20%', 'price' => 25], 
-
-    5 => ['name' => 'Кефір 1%', 'price' => 19], 
-
-    6 => ['name' => 'Вода газована', 'price' => 18], 
-
-    7 => ['name' => 'Печиво "Весна"', 'price' => 14], 
-
-]; 
-
- 
-
-// Кошик користувача 
-
-$cart = []; 
-
- 
-
-// Дані користувача 
-
-$user = [ 
-
-    'name' => '', 
-
-    'age' => 0 
-
-]; 
-
- 
-
-// Головна функція 
-
-function main() { 
-
-    global $cart; 
-
-     
-
-    while (true) { 
-
-        showMainMenu(); 
-
-        $command = readline("Введіть команду: "); 
-
-         
-
-        switch ($command) { 
-
-            case '0': 
-
-                echo "Дякуємо за покупки! До побачення!\n"; 
-
-                exit(0); 
-
-            case '1': 
-
-                selectProducts(); 
-
-                break; 
-
-            case '2': 
-
-                showReceipt(); 
-
-                break; 
-
-            case '3': 
-
-                manageProfile(); 
-
-                break; 
-
-            default: 
-
-                echo "ПОМИЛКА! Введіть правильну команду\n"; 
-
-                break; 
-
-        } 
-
-    } 
-
-} 
-
- 
-
-// Відображення головного меню 
-
-function showMainMenu() { 
-
-    echo "\n"; 
-
-    echo "################################\n"; 
-
-    echo "# ПРОДОВОЛЬЧИЙ МАГАЗИН \"ВЕСНА\" #\n"; 
-
-    echo "################################\n"; 
-
-    echo "1 Вибрати товари\n"; 
-
-    echo "2 Отримати підсумковий рахунок\n"; 
-
-    echo "3 Налаштувати свій профіль\n"; 
-
-    echo "0 Вийти з програми\n"; 
-
-} 
-
- 
-
-// Функція вибору товарів 
-
-function selectProducts() { 
-
-    global $products, $cart; 
-
-     
-
-    while (true) { 
-
-        showProductList(); 
-
-        $productId = readline("Виберіть товар: "); 
-
-         
-
-        if ($productId === '0') { 
-
-            return; 
-
-        } 
-
-         
-
-        if (!isset($products[$productId])) { 
-
-            echo "ПОМИЛКА! ВКАЗАНО НЕПРАВИЛЬНИЙ НОМЕР ТОВАРУ\n\n"; 
-
-            continue; 
-
-        } 
-
-         
-
-        $product = $products[$productId]; 
-
-        echo "Вибрано: " . $product['name'] . "\n"; 
-
-         
-
-        $quantity = readline("Введіть кількість, штук: "); 
-
-        $quantity = (int)$quantity; 
-
-         
-
-        if ($quantity < 0) { 
-
-            echo "ПОМИЛКА! Кількість товару повинна бути більшою або рівною нулю.\n"; 
-
-            continue; 
-
-        } 
-
-         
-
-        if ($quantity >= 100) { 
-
-            echo "ПОМИЛКА! Кількість товару повинна бути менше 100 штук.\n"; 
-
-            continue; 
-
-        } 
-
-         
-
-        if ($quantity === 0) { 
-
-            if (isset($cart[$productId])) { 
-
-                unset($cart[$productId]); 
-
-                echo "ВИДАЛЯЮ З КОШИКА\n"; 
-
-                if (empty($cart)) { 
-
-                    echo "КОШИК ПОРОЖНІЙ\n"; 
-
-                } else { 
-
-                    showCart(); 
-
-                } 
-
-            } else { 
-
-                echo "ТОВАР ВІДСУТНІЙ У КОШИКУ\n"; 
-
-            } 
-
-        } else { 
-
-            $cart[$productId] = [ 
-
-                'name' => $product['name'], 
-
-                'price' => $product['price'], 
-
-                'quantity' => $quantity 
-
-            ]; 
-
-            echo "У КОШИКУ:\n"; 
-
-            showCart(); 
-
-        } 
-
-    } 
-
-} 
-
- 
-
-// Відображення списку товарів 
-
-function showProductList() { 
-
-    global $products; 
-
-     
-
-    echo "\n"; 
-
-    echo "№  НАЗВА                 ЦІНА\n"; 
-
-    foreach ($products as $id => $product) { 
-
-        $name = $product['name']; 
-
-        $spaces = 22 - mb_strlen($name); 
-
-        if ($spaces < 0) $spaces = 0; 
-
-         
-
-        echo $id . "  " . $name . str_repeat(" ", $spaces) . $product['price'] . "\n"; 
-
-    } 
-
-    echo "   -----------\n"; 
-
-    echo "0  ПОВЕРНУТИСЯ\n"; 
-
-} 
-
- 
-
-// Відображення вмісту кошика 
-
-function showCart() { 
-
-    global $cart; 
-
-     
-
-    echo "НАЗВА        КІЛЬКІСТЬ\n"; 
-
-    foreach ($cart as $item) { 
-
-        $name = $item['name']; 
-
-        if (mb_strlen($name) > 12) { 
-
-            $name = mb_substr($name, 0, 12); 
-
-        } 
-
-        $spaces = 12 - mb_strlen($name); 
-
-        if ($spaces < 0) $spaces = 0; 
-
-         
-
-        echo $name . str_repeat(" ", $spaces) . $item['quantity'] . "\n"; 
-
-    } 
-
-} 
-
- 
-
-// Відображення підсумкового рахунку 
-
-function showReceipt() { 
-
-    global $cart; 
-
-     
-
-    if (empty($cart)) { 
-
-        echo "КОШИК ПОРОЖНІЙ\n"; 
-
-        return; 
-
-    } 
-
-     
-
-    echo "№  НАЗВА                 ЦІНА  КІЛЬКІСТЬ  ВАРТІСТЬ\n"; 
-
-     
-
-    $totalCost = 0; 
-
-    $i = 1; 
-
-     
-
-    foreach ($cart as $item) { 
-
-        $cost = $item['price'] * $item['quantity']; 
-
-        $totalCost += $cost; 
-
-         
-
-        $name = $item['name']; 
-
-        $nameSpaces = 22 - mb_strlen($name); 
-
-        if ($nameSpaces < 0) $nameSpaces = 0; 
-
-         
-
-        $priceStr = (string)$item['price']; 
-
-        $priceSpaces = 5 - strlen($priceStr); 
-
-        if ($priceSpaces < 0) $priceSpaces = 0; 
-
-         
-
-        $quantityStr = (string)$item['quantity']; 
-
-        $quantitySpaces = 10 - strlen($quantityStr); 
-
-        if ($quantitySpaces < 0) $quantitySpaces = 0; 
-
-         
-
-        echo $i . "  " . $name . str_repeat(" ", $nameSpaces)  
-
-            . $priceStr . str_repeat(" ", $priceSpaces)  
-
-            . $quantityStr . str_repeat(" ", $quantitySpaces) . $cost . "\n"; 
-
-         
-
-        $i++; 
-
-    } 
-
-     
-
-    echo "РАЗОМ ДО CПЛАТИ: " . $totalCost . "\n"; 
-
-} 
-
- 
-
-// Функція налаштування профілю 
-
-function manageProfile() { 
-
-    global $user; 
-
-     
-
-    $name = readline("Ваше імʼя: "); 
-
-     
-
-    // Перевірка імені 
-
-    if (empty($name) || !preg_match('/[a-zA-Zа-яА-ЯіІїЇєЄґҐ]/u', $name)) { 
-
-        echo "ПОМИЛКА! Ім'я повинно містити хоча б одну літеру.\n"; 
-
-        return; 
-
-    } 
-
-     
-
-    $age = readline("Ваш вік: "); 
-
-    $age = (int)$age; 
-
-     
-
-    // Перевірка віку 
-
-    if ($age < 7 || $age > 150) { 
-
-        echo "ПОМИЛКА! Вік повинен бути від 7 до 150 років.\n"; 
-
-        return; 
-
-    } 
-
-     
-
-    // Зберігаємо дані користувача 
-
-    $user['name'] = $name; 
-
-    $user['age'] = $age; 
-
-     
-
-    echo "Профіль успішно оновлено!\n"; 
-
-} 
-
- 
-
-// Запуск програми 
-
-main(); 
-
-?> 
-
+1 <?php 
+2 // Кодування для коректного відображення кирилиці в терміналі 
+3 system('chcp 65001'); 
+4 // Товари в магазині 
+5 $products = [ 
+6     1 => ['name' => 'Молоко пастеризоване', 'price' => 12], 
+7     2 => ['name' => 'Хліб чорний', 'price' => 9], 
+8     3 => ['name' => 'Сир білий', 'price' => 21], 
+9     4 => ['name' => 'Сметана 20%', 'price' => 25], 
+10     5 => ['name' => 'Кефір 1%', 'price' => 19], 
+11     6 => ['name' => 'Вода газована', 'price' => 18], 
+12     7 => ['name' => 'Печиво "Весна"', 'price' => 14], 
+13 ]; 
+14 // Кошик користувача 
+15 $cart = []; 
+16 // Дані користувача 
+17 $user = [ 
+18     'name' => '', 
+19     'age' => 0 
+20 ]; 
+21 // Головна функція 
+22 function main() { 
+23     global $cart; 
+24     while (true) { 
+25         showMainMenu(); 
+26         $command = readline("Введіть команду: "); 
+27         switch ($command) { 
+28             case '0': 
+29                 echo "Дякуємо за покупки! До побачення!\n"; 
+30                 exit(0); 
+31             case '1': 
+32                 selectProducts(); 
+33                 break; 
+34             case '2': 
+35                 showReceipt(); 
+36                 break; 
+37             case '3': 
+38                 manageProfile(); 
+39                 break; 
+40             default: 
+41                 echo "ПОМИЛКА! Введіть правильну команду\n"; 
+42                 break; 
+43         } 
+44     } 
+45 } 
+46 // Відображення головного меню 
+47 function showMainMenu() { 
+48     echo "\n"; 
+49     echo "################################\n"; 
+50     echo "# ПРОДОВОЛЬЧИЙ МАГАЗИН \"ВЕСНА\" #\n"; 
+51     echo "################################\n"; 
+52     echo "1 Вибрати товари\n"; 
+53     echo "2 Отримати підсумковий рахунок\n"; 
+54     echo "3 Налаштувати свій профіль\n"; 
+55     echo "0 Вийти з програми\n"; 
+56 } 
+57 // Функція вибору товарів 
+58 function selectProducts() { 
+59     global $products, $cart; 
+60     while (true) { 
+61         showProductList(); 
+62         $productId = readline("Виберіть товар: "); 
+63         if ($productId === '0') { 
+64             return; 
+65         } 
+66         if (!isset($products[$productId])) { 
+67             echo "ПОМИЛКА! ВКАЗАНО НЕПРАВИЛЬНИЙ НОМЕР ТОВАРУ\n\n"; 
+68             continue; 
+69         } 
+70         $product = $products[$productId]; 
+71         echo "Вибрано: " . $product['name'] . "\n"; 
+72         $quantity = readline("Введіть кількість, штук: "); 
+73         $quantity = (int)$quantity; 
+74         if ($quantity < 0) { 
+75             echo "ПОМИЛКА! Кількість товару повинна бути більшою або рівною нулю.\n"; 
+76             continue; 
+77         } 
+78         if ($quantity >= 100) { 
+79             echo "ПОМИЛКА! Кількість товару повинна бути менше 100 штук.\n"; 
+80             continue; 
+81         } 
+82         if ($quantity === 0) { 
+83             if (isset($cart[$productId])) { 
+84                 unset($cart[$productId]); 
+85                 echo "ВИДАЛЯЮ З КОШИКА\n"; 
+86                 if (empty($cart)) { 
+87                     echo "КОШИК ПОРОЖНІЙ\n"; 
+88                 } else { 
+89                     showCart(); 
+90                 } 
+91             } else { 
+92                 echo "ТОВАР ВІДСУТНІЙ У КОШИКУ\n"; 
+93             } 
+94         } else { 
+95             $cart[$productId] = [ 
+96                 'name' => $product['name'], 
+97                 'price' => $product['price'], 
+98                 'quantity' => $quantity 
+99             ]; 
+100             echo "У КОШИКУ:\n"; 
+101             showCart(); 
+102         } 
+103     } 
+104 } 
+105 // Відображення списку товарів 
+106 function showProductList() { 
+107     global $products; 
+108     echo "\n"; 
+109     echo "№  НАЗВА                 ЦІНА\n"; 
+110     foreach ($products as $id => $product) { 
+111         $name = $product['name']; 
+112         $spaces = 22 - mb_strlen($name); 
+113         if ($spaces < 0) $spaces = 0; 
+114         echo $id . "  " . $name . str_repeat(" ", $spaces) . $product['price'] . "\n"; 
+115     } 
+116     echo "   -----------\n"; 
+117     echo "0  ПОВЕРНУТИСЯ\n"; 
+118 } 
+119 // Відображення вмісту кошика 
+120 function showCart() { 
+121     global $cart; 
+122     echo "НАЗВА        КІЛЬКІСТЬ\n"; 
+123     foreach ($cart as $item) { 
+124         $name = $item['name']; 
+125         if (mb_strlen($name) > 12) { 
+126             $name = mb_substr($name, 0, 12); 
+127         } 
+128         $spaces = 12 - mb_strlen($name); 
+129         if ($spaces < 0) $spaces = 0; 
+130         echo $name . str_repeat(" ", $spaces) . $item['quantity'] . "\n"; 
+131     } 
+132 } 
+133 // Відображення підсумкового рахунку 
+134 function showReceipt() { 
+135     global $cart; 
+136     if (empty($cart)) { 
+137         echo "КОШИК ПОРОЖНІЙ\n"; 
+138         return; 
+139     } 
+140     echo "№  НАЗВА                 ЦІНА  КІЛЬКІСТЬ  ВАРТІСТЬ\n"; 
+141     $totalCost = 0; 
+142     $i = 1; 
+143     foreach ($cart as $item) { 
+144         $cost = $item['price'] * $item['quantity']; 
+145         $totalCost += $cost; 
+146         $name = $item['name']; 
+147         $nameSpaces = 22 - mb_strlen($name); 
+148         if ($nameSpaces < 0) $nameSpaces = 0; 
+149         $priceStr = (string)$item['price']; 
+150         $priceSpaces = 5 - strlen($priceStr); 
+151         if ($priceSpaces < 0) $priceSpaces = 0; 
+152         $quantityStr = (string)$item['quantity']; 
+153         $quantitySpaces = 10 - strlen($quantityStr); 
+154         if ($quantitySpaces < 0) $quantitySpaces = 0; 
+155         echo $i . "  " . $name . str_repeat(" ", $nameSpaces)  
+156             . $priceStr . str_repeat(" ", $priceSpaces)  
+157             . $quantityStr . str_repeat(" ", $quantitySpaces) . $cost . "\n"; 
+158         $i++; 
+159     } 
+160     echo "РАЗОМ ДО CПЛАТИ: " . $totalCost . "\n"; 
+161 } 
+162 // Функція налаштування профілю 
+163 function manageProfile() { 
+164     global $user; 
+165     $name = readline("Ваше імʼя: "); 
+166     // Перевірка імені 
+167     if (empty($name) || !preg_match('/[a-zA-Zа-яА-ЯіІїЇєЄґҐ]/u', $name)) { 
+168         echo "ПОМИЛКА! Ім'я повинно містити хоча б одну літеру.\n"; 
+169         return; 
+170     } 
+171     $age = readline("Ваш вік: "); 
+172     $age = (int)$age; 
+173     // Перевірка віку 
+174     if ($age < 7 || $age > 150) { 
+175         echo "ПОМИЛКА! Вік повинен бути від 7 до 150 років.\n"; 
+176         return; 
+177     } 
+178     // Зберігаємо дані користувача 
+179     $user['name'] = $name; 
+180     $user['age'] = $age; 
+181     echo "Профіль успішно оновлено!\n"; 
+182 } 
+183 // Запуск програми 
+184 main(); 
+185 ?>
