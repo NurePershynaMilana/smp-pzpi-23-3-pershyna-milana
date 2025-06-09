@@ -214,8 +214,10 @@ exit 0
 
 ДОДАТОК В
 Повний код програми 
-В.1
-GitHub репозиторій: 
+
+В.1 Основний файл програми
+GitHub репозиторій: https://github.com/NurePershynaMilana/smp-pzpi-23-3-pershyna-milana/blob/main/Pract1/spm-pzpi-23-3-pershyna-milana-pract1-code/smp-pzpi-23-3-pershyna-milana-pract1-code.sh
+
 1 #!/bin/bash
 2 # Перевіряємо, чи передано два аргументи
 3 if [[ -z "$1" || -z "$2" ]]; then
