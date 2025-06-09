@@ -1,16 +1,11 @@
-Міністерство освіти та науки України
 Харківський національний університет радіоелектроніки
-
-
-Кафедра програмної інженерії
-
-
-
+Факультет комп’ютерних наук
+Катедра програмної інженерії
 
 
 
 ЗВІТ
-ПРО ЛАБОРАТОРНУ РОБОТУ №3
+з лабораторної роботи №3
 з дисципліни «Скриптові мови програмування»
 
 
@@ -364,7 +359,9 @@ php -S localhost:8000 pzpi-23-3-pershyna-milana-task4.php
 ДОДАТОК В 
 Повний код програми 
 
-pzpi-23-3-pershyna-milana-task4.php (main file):
+В.1 Основний файл програми - pzpi-23-3-pershyna-milana-task4.php
+GitHub репозиторій: https://github.com/NurePershynaMilana/smp-pzpi-23-3-pershyna-milana/blob/main/Lab3/spm-pzpi-23-3-pershyna-milana-lab3/spm-pzpi-23-3-pershyna-milana-lab3-code.php
+
 1 <?php 
 2 // Include header 
 3 require_once('header.php'); 
@@ -389,8 +386,9 @@ pzpi-23-3-pershyna-milana-task4.php (main file):
 22 require_once('footer.php'); 
 23 ?> 
 
+В.2 Заголовок (header) програми - header.php
+GitHub репозиторій: https://github.com/NurePershynaMilana/smp-pzpi-23-3-pershyna-milana/blob/main/Lab3/spm-pzpi-23-3-pershyna-milana-lab3/header.php
 
-header.php:
 1 <?php 
 2 // Start session for cart functionality 
 3 session_start(); 
@@ -512,7 +510,9 @@ header.php:
 119         <div class="content"> 
 
 
-footer.php:
+В.3 Підвал (footer) програми - footer.php
+GitHub репозиторій: https://github.com/NurePershynaMilana/smp-pzpi-23-3-pershyna-milana/blob/main/Lab3/spm-pzpi-23-3-pershyna-milana-lab3/footer.php
+
 1 </div><!-- Close div.content --> 
 2     </div><!-- Close div.container --> 
 3     <div class="footer"> 
@@ -529,8 +529,9 @@ footer.php:
 14 </body> 
 15 </html> 
 
+В.4 Кошик (cart) - cart.php
+GitHub репозиторій: https://github.com/NurePershynaMilana/smp-pzpi-23-3-pershyna-milana/blob/main/Lab3/spm-pzpi-23-3-pershyna-milana-lab3/cart.php
 
-cart.php:
 1 <?php 
 2 // Products array (simulating database) 
 3 $products = [ 
@@ -629,8 +630,9 @@ cart.php:
 96 } 
 97 ?> 
 
+В.5 Сторінка продуктів (products) - products.php
+GitHub репозиторій: https://github.com/NurePershynaMilana/smp-pzpi-23-3-pershyna-milana/blob/main/Lab3/spm-pzpi-23-3-pershyna-milana-lab3/products.php
 
-products.php:
 1 <?php 
 2 // Products array (simulating database) 
 3 $products = [ 
